@@ -1,0 +1,122 @@
+[
+  {
+    "symptom": "headache",
+    "status": "present",
+    "duration": "for the past 3 days",
+    "context": "Patient: Hi doctor, I've been having this terrible headache for the past 3 days."
+  },
+  {
+    "symptom": "headache",
+    "status": "present",
+    "duration": "not specified",
+    "context": "Doctor: I see. Can you describe the headache? Where is it located?\n    \n    Patient: It's mostly on the right side of my head, and it's a throbbing pain."
+  },
+  {
+    "symptom": "pain",
+    "status": "present",
+    "duration": "not specified",
+    "context": "Doctor: I see. Can you describe the headache? Where is it located?\n    \n    Patient: It's mostly on the right side of my head, and it's a throbbing pain."
+  },
+  {
+    "symptom": "nausea",
+    "status": "present",
+    "duration": "since yesterday",
+    "context": "I've also had some nausea since yesterday."
+  },
+  {
+    "symptom": "fever",
+    "status": "present",
+    "duration": "not specified",
+    "context": "Doctor: Have you had any fever?"
+  },
+  {
+    "symptom": "fever",
+    "status": "present",
+    "duration": "not specified",
+    "context": "Patient: Yes, I had a low-grade fever for about 2 days, but it went away this morning."
+  },
+  {
+    "symptom": "sore throat",
+    "status": "present",
+    "duration": "for 4 days",
+    "context": "Doctor: Any other symptoms?\n    \n    Patient: Well, I've been feeling fatigued for the last week or so. And I've had a \n    sore throat for 4 days now."
+  },
+  {
+    "symptom": "chest pain",
+    "status": "present",
+    "duration": "2 days ago",
+    "context": "Also experiencing some chest pain that started 2 days ago."
+  },
+  {
+    "symptom": "shortness of breath",
+    "status": "present",
+    "duration": "not specified",
+    "context": "Any shortness of breath?"
+  },
+  {
+    "symptom": "vomiting or diarrhea",
+    "status": "present",
+    "duration": "not specified",
+    "context": "Doctor: Any vomiting or diarrhea?\n    \n    Patient: No vomiting, no diarrhea."
+  },
+  {
+    "symptom": "vomiting",
+    "status": "absent",
+    "duration": "not specified",
+    "context": "Doctor: Any vomiting or diarrhea?\n    \n    Patient: No vomiting, no diarrhea."
+  },
+  {
+    "symptom": "diarrhea",
+    "status": "absent",
+    "duration": "not specified",
+    "context": "Doctor: Any vomiting or diarrhea?\n    \n    Patient: No vomiting, no diarrhea."
+  },
+  {
+    "symptom": "bleeding",
+    "status": "absent",
+    "duration": "not specified",
+    "context": "Patient denies any bleeding or bruising."
+  },
+  {
+    "symptom": "bruising",
+    "status": "absent",
+    "duration": "not specified",
+    "context": "Patient denies any bleeding or bruising."
+  },
+  {
+    "symptom": "cough",
+    "status": "present",
+    "duration": "not specified",
+    "context": "Doctor: Have you had any cough?\n    \n    Patient: No cough at all. And I haven't had any dizziness either."
+  },
+  {
+    "symptom": "cough",
+    "status": "absent",
+    "duration": "not specified",
+    "context": "Doctor: Have you had any cough?\n    \n    Patient: No cough at all. And I haven't had any dizziness either."
+  },
+  {
+    "symptom": "dizziness",
+    "status": "absent",
+    "duration": "not specified",
+    "context": "Doctor: Have you had any cough?\n    \n    Patient: No cough at all. And I haven't had any dizziness either."
+  },
+  {
+    "symptom": "swelling",
+    "status": "absent",
+    "duration": "not specified",
+    "context": "No swelling in the legs?\n    \n    Patient: No swelling."
+  },
+  {
+    "symptom": "swelling",
+    "status": "absent",
+    "duration": "not specified",
+    "context": "No swelling in the legs?\n    \n    Patient: No swelling."
+  },
+  {
+    "symptom": "rash",
+    "status": "absent",
+    "duration": "not specified",
+    "context": "No rash either."
+  }
+]
