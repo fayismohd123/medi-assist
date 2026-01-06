@@ -4,9 +4,13 @@ import uuid
 from werkzeug.utils import secure_filename
 from flask import Flask, request, render_template, jsonify, session, redirect
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.secret_key = "mediassist_secret_key"
+
+# Enable CORS for React frontend
+CORS(app, supports_credentials=True, origins=["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173", "http://127.0.0.1:3000"])
 
 # -------------------------------------------------------------------
 # Database configuration (ABSOLUTE PATH – prevents corruption issues)
@@ -87,9 +91,10 @@ ensure_patients_table()
 # -------------------------------------------------------------------
 # Routes
 # -------------------------------------------------------------------
-@app.route("/")
-def home():
-    return render_template("login.html")
+# Template routes commented out - React frontend handles routing
+# @app.route("/")
+# def home():
+#     return render_template("login.html")
 
 
 @app.route("/api/signup", methods=["POST"])
@@ -139,23 +144,43 @@ def login():
         session["user"] = email
         # store display name in session for templates
         session["name"] = user["name"] if user["name"] else ""
-        return jsonify({"message": "Login successful"}), 200
+        return jsonify({
+            "message": "Login successful",
+            "user": {
+                "email": email,
+                "name": user["name"] if user["name"] else ""
+            }
+        }), 200
 
     return jsonify({"error": "Invalid credentials"}), 401
 
 
-@app.route("/api/logout")
+@app.route("/api/logout", methods=["POST"])
 def logout():
     session.clear()
-    return redirect("/")
+    return jsonify({"message": "Logged out"}), 200
 
 
-@app.route("/dashboard")
-def dashboard():
-    if "user" not in session:
-        return redirect("/")
-    doctor_name = session.get("name", "")
-    return render_template("dashboard.html", doctor_name=doctor_name)
+@app.route("/api/auth/status")
+def auth_status():
+    if "user" in session:
+        return jsonify({
+            "authenticated": True,
+            "user": {
+                "email": session.get("user"),
+                "name": session.get("name", "")
+            }
+        }), 200
+    return jsonify({"authenticated": False}), 401
+
+
+# Template route commented out - React frontend handles routing
+# @app.route("/dashboard")
+# def dashboard():
+#     if "user" not in session:
+#         return redirect("/")
+#     doctor_name = session.get("name", "")
+#     return render_template("dashboard.html", doctor_name=doctor_name)
 
 
 # -------------------------------------------------------------------

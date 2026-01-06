@@ -1,0 +1,197 @@
+.patient-lookup {
+  width: 100%;
+  max-width: 100%;
+}
+
+.input-container {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+.input-container input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  padding-right: 3rem;
+  background: rgba(30, 58, 138, 0.5);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  border-radius: 0.5rem;
+  color: white;
+  font-size: 1.05rem;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.input-container input::placeholder {
+  color: rgba(191, 219, 254, 0.5);
+}
+
+.input-container input:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
+}
+
+.input-container input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.lookup-btn {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.5rem;
+  background: linear-gradient(180deg,#FFB76A 0%,#FF8C00 100%);
+  border: none;
+  border-radius: 0.6rem;
+  color: #1b1b1b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.03) inset;
+}
+
+.lookup-btn:hover:not(:disabled),
+.lookup-btn:focus-visible:not(:disabled) {
+  transform: translateY(-50%);
+  box-shadow: 0 10px 30px rgba(255,140,0,0.18), 0 2px 6px rgba(255,140,0,0.08) inset;
+}
+
+.lookup-btn:active:not(:disabled) {
+  transform: translateY(-50%);
+  box-shadow: 0 14px 36px rgba(255,140,0,0.22), 0 2px 8px rgba(255,140,0,0.10) inset;
+}
+
+.lookup-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.patient-info {
+  font-size: 0.875rem;
+  color: #bfdbfe;
+}
+
+/* Patient list (when multiple matches) */
+.patient-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.patient-item {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(96,165,250,0.06);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.patient-item:hover {
+  background: rgba(255,255,255,0.03);
+  border-color: rgba(96,165,250,0.18);
+}
+
+/* Enhanced error message styling */
+.error-container {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.error-message {
+  color: #fca5a5;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.add-patient-button {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(180deg,#FFB76A 0%,#FF8C00 100%);
+  border: none;
+  border-radius: 0.65rem;
+  color: #111111;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.18s;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.55);
+  font-family: inherit;
+}
+
+.add-patient-button:hover {
+  transform: translateY(-1px);
+}
+
+/* Success message styling */
+.success-message {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+  color: #6ee7b7;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.success-message-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.button-container {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.history-button {
+  background: #F0F0F0;
+  color: #111827;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.history-button:hover {
+  background: #e6e6e6;
+  transform: translateY(-1px);
+}
