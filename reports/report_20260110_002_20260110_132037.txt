@@ -1,0 +1,40 @@
+============================================================
+MEDICAL CONSULTATION REPORT
+============================================================
+
+PATIENT INFORMATION
+------------------------------------------------------------
+Name: Fayis Muhammed
+Date of Birth: 2003-07-23
+Email: fayiznk26@gmail.com
+Phone: +918111937361
+Appointment Token: 20260110_002
+Date: 2026-02-02
+
+PHYSICIAN INFORMATION
+------------------------------------------------------------
+Name: None
+Speciality: None
+Contact: None
+
+CHIEF COMPLAINTS & SYMPTOMS
+------------------------------------------------------------
+• No specific symptoms reported
+
+CONSULTATION TRANSCRIPT
+------------------------------------------------------------
+nothing
+
+PHYSICIAN NOTES
+------------------------------------------------------------
+No additional notes
+
+ASSESSMENT & RECOMMENDATIONS
+------------------------------------------------------------
+• Further evaluation may be needed based on symptoms
+• Patient advised to monitor symptoms and seek care if worsens
+• Follow-up consultation recommended in 1 week
+
+============================================================
+Report Generated: 2026-01-10 13:20:37
+============================================================

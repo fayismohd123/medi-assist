@@ -35,7 +35,36 @@ print("Database path:", DB_PATH)
         #print("Could not add 'name' column:", e)
 #conn.close()
 
-# Create patients table (allows duplicate phone numbers)
+# Create appointments table (token-based booking system)
+conn = sqlite3.connect(DB_PATH)
+c = conn.cursor()
+c.execute("""
+CREATE TABLE IF NOT EXISTS appointments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token TEXT UNIQUE NOT NULL,
+    patient_name TEXT NOT NULL,
+    patient_dob TEXT NOT NULL,
+    patient_email TEXT NOT NULL,
+    patient_phone TEXT NOT NULL,
+    appointment_date TEXT NOT NULL,
+    physician_name TEXT,
+    physician_speciality TEXT,
+    physician_contact TEXT,
+    status TEXT DEFAULT 'scheduled',
+    consultation_notes TEXT,
+    recorded_audio_path TEXT,
+    report_generated BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    completed_at DATETIME,
+    doctor_id INTEGER,
+    FOREIGN KEY(doctor_id) REFERENCES users(id)
+)
+""")
+conn.commit()
+conn.close()
+print("Appointments table verified/created successfully")
+
+# Keep patients table for backwards compatibility
 conn = sqlite3.connect(DB_PATH)
 c = conn.cursor()
 c.execute("""
@@ -50,5 +79,5 @@ CREATE TABLE IF NOT EXISTS patients (
 """)
 conn.commit()
 conn.close()
-print("Patients table verified/created successfully")
+print("Patients table verified/created successfully (backwards compatibility)")
 

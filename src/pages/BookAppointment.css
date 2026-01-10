@@ -1,4 +1,4 @@
-/* Professional Blue & White Theme - Login Page */
+/* Professional Blue & White Theme - Book Appointment Page */
 
 :root {
   --primary-blue: #1e40af;
@@ -24,7 +24,7 @@ body {
 }
 
 /* ===== CONTAINER ===== */
-.login-container {
+.book-appointment-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -33,19 +33,7 @@ body {
   padding: 1.5rem;
 }
 
-.min-h-screen {
-  width: 100%;
-  max-width: 600px;
-  display: flex;
-  justify-content: center;
-}
-
-.container {
-  width: 100%;
-  max-width: 600px;
-}
-
-.auth-card {
+.booking-card {
   background-color: var(--white);
   border-radius: 0.75rem;
   padding: 2.5rem 2.5rem;
@@ -56,23 +44,21 @@ body {
 }
 
 /* ===== HEADER ===== */
-.auth-card h1 {
-  font-size: 2rem;
+.booking-card h1 {
+  font-size: 1.875rem;
   color: var(--primary-blue);
   margin-bottom: 0.5rem;
-  text-align: center;
   font-weight: 700;
 }
 
-.auth-card p {
-  text-align: center;
+.booking-card .subtitle {
   color: var(--text-light);
   margin-bottom: 2rem;
   font-size: 0.95rem;
 }
 
 /* ===== FORM ===== */
-.auth-form {
+.booking-form {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -85,13 +71,21 @@ body {
 }
 
 .form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 600;
   color: var(--text-dark);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 
-.form-group input,
-.form-group select {
+.form-group label svg {
+  width: 18px;
+  height: 18px;
+  color: var(--light-blue);
+}
+
+.form-group input {
   padding: 0.875rem 1rem;
   border: 1px solid var(--medium-gray);
   border-radius: 0.5rem;
@@ -104,8 +98,7 @@ body {
   box-sizing: border-box;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.form-group input:focus {
   outline: none;
   border-color: var(--light-blue);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
@@ -127,37 +120,118 @@ body {
   font-size: 0.95rem;
   transition: all 0.2s;
   width: 100%;
+  margin-top: 0.5rem;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background-color: var(--primary-blue);
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(30, 64, 175, 0.2);
 }
 
-.btn-primary:active {
+.btn-primary:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.btn-secondary {
-  margin-top: 1rem;
-  padding: 0.875rem 1.5rem;
-  background-color: var(--light-gray);
-  color: var(--text-dark);
-  border: 1px solid var(--medium-gray);
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: all 0.2s;
-  width: 100%;
+.btn-primary:disabled {
+  background-color: var(--medium-gray);
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
-.btn-secondary:hover {
-  background-color: var(--lighter-blue);
-  border-color: var(--light-blue);
+/* ===== SUCCESS BOX ===== */
+.success-box {
+  background-color: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.success-box svg {
+  width: 48px;
+  height: 48px;
+  color: #16a34a;
+}
+
+.success-box h2 {
+  font-size: 1.5rem;
+  color: #166534;
+  margin: 0;
+}
+
+.success-box p {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.token-display {
+  background-color: var(--light-gray);
+  border: 2px solid var(--light-blue);
+  border-radius: 0.5rem;
+  padding: 1.5rem 1rem;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.token-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: 'Monaco', 'Menlo', monospace;
+  color: var(--primary-blue);
+}
+
+.copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background-color: var(--light-blue);
+  color: var(--white);
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  background-color: var(--primary-blue);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+}
+
+.token-info {
+  background-color: var(--lighter-blue);
+  color: var(--primary-blue);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+.token-info strong {
+  font-weight: 600;
+}
+
+/* ===== ERROR MESSAGE ===== */
+.error-message {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  border-left: 3px solid #dc2626;
+  margin-bottom: 1rem;
 }
 
 /* ===== LINKS ===== */
@@ -180,58 +254,17 @@ body {
   text-decoration: underline;
 }
 
-/* ===== BOOK APPOINTMENT LINK ===== */
-.booking-link {
-  text-align: center;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--medium-gray);
-}
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .booking-card {
+    padding: 2rem 1.5rem;
+  }
 
-.booking-link a {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background-color: var(--lighter-blue);
-  color: var(--primary-blue);
-  text-decoration: none;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-  border: 1px solid var(--light-blue);
-}
+  .booking-card h1 {
+    font-size: 1.5rem;
+  }
 
-.booking-link a:hover {
-  background-color: var(--light-blue);
-  color: var(--white);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-}
-
-/* ===== ERROR & SUCCESS ===== */
-.error-message {
-  background-color: #fee2e2;
-  color: #991b1b;
-  padding: 0.875rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  border-left: 3px solid #dc2626;
-  margin-bottom: 1rem;
-}
-
-.success-message {
-  background-color: #dcfce7;
-  color: #166534;
-  padding: 0.875rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  border-left: 3px solid #16a34a;
-  margin-bottom: 1rem;
-}
-
-/* ===== LOADING STATE ===== */
-.btn-primary:disabled {
-  background-color: var(--medium-gray);
-  cursor: not-allowed;
-  opacity: 0.6;
+  .token-display {
+    flex-direction: column;
+  }
 }
