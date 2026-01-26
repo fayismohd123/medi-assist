@@ -1,0 +1,118 @@
+/* Professional Blue & White Theme - App Global Styles */
+
+:root {
+  --primary-blue: #1e40af;
+  --light-blue: #3b82f6;
+  --lighter-blue: #dbeafe;
+  --white: #ffffff;
+  --light-gray: #f8fafc;
+  --medium-gray: #e2e8f0;
+  --dark-gray: #64748b;
+  --text-dark: #1e293b;
+  --text-light: #475569;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--light-gray);
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ===== GLOBAL BUTTONS ===== */
+button {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* ===== GLOBAL LINKS ===== */
+a {
+  color: var(--light-blue);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--primary-blue);
+}
+
+/* ===== GLOBAL INPUT ===== */
+input,
+textarea,
+select {
+  font-family: inherit;
+  color: var(--text-dark);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background-color: var(--medium-gray);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-gray);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--lighter-blue);
+  border-radius: 5px;
+  border: 2px solid var(--light-gray);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--light-blue);
+}
+
+/* ===== SELECTION ===== */
+::selection {
+  background-color: var(--light-blue);
+  color: var(--white);
+}
+
+/* ===== PLACEHOLDER ===== */
+::placeholder {
+  color: var(--dark-gray);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  :root {
+    --base-spacing: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --base-spacing: 0.75rem;
+  }
+}
