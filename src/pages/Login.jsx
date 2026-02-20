@@ -52,6 +52,8 @@ function Login() {
     const email = formData.get('email')
     const password = formData.get('password')
     const confirmPassword = formData.get('confirmPassword')
+    const speciality = formData.get('speciality')
+    const contact = formData.get('contact')
 
     if (password !== confirmPassword) {
       alert('Passwords do not match')
@@ -62,7 +64,7 @@ function Login() {
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password })
+        body: JSON.stringify({ name, email, password, speciality, contact })
       })
 
       const data = await res.json()
@@ -235,6 +237,30 @@ function Login() {
                       type="password"
                       placeholder="Confirm your password"
                       required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="speciality">Medical Speciality</label>
+                  <div className="input-container">
+                    <input
+                      id="speciality"
+                      name="speciality"
+                      type="text"
+                      placeholder="e.g., Cardiology, Pediatrics, General Medicine"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="contact">Contact Number</label>
+                  <div className="input-container">
+                    <input
+                      id="contact"
+                      name="contact"
+                      type="tel"
+                      placeholder="e.g., +91-9876543210"
                     />
                   </div>
                 </div>

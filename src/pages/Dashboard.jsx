@@ -12,6 +12,8 @@ export default function Dashboard() {
   const [symptoms, setSymptoms] = useState([])
   const [transcript, setTranscript] = useState('')
   const [reportGenerated, setReportGenerated] = useState(false)
+  const [reportContent, setReportContent] = useState('')
+  const [reportFilename, setReportFilename] = useState('')
   const [doctorName, setDoctorName] = useState('')
   const [appointments, setAppointments] = useState([])
   const [recordingFilename, setRecordingFilename] = useState('')
@@ -131,9 +133,22 @@ export default function Dashboard() {
           
           if (response.ok) {
             console.log('Recording uploaded successfully:', data)
+            console.log('Response symptoms:', data.detected_symptoms)
             setRecordingFilename(data.audio_file)
             setTranscript(data.transcript)
-            setSymptoms(data.symptoms)
+            // ✅ Handle detected_symptoms from backend
+            if (data.detected_symptoms && Array.isArray(data.detected_symptoms)) {
+              console.log('Setting symptoms:', data.detected_symptoms)
+              // Extract symptoms list from the response object if nested
+              if (data.detected_symptoms.symptoms) {
+                setSymptoms(data.detected_symptoms.symptoms)
+              } else {
+                setSymptoms(data.detected_symptoms)
+              }
+            } else {
+              console.warn('No symptoms found in response')
+              setSymptoms([])
+            }
             alert('Recording processed successfully!')
           } else {
             alert('Error uploading recording: ' + data.error)
@@ -186,7 +201,8 @@ export default function Dashboard() {
 
       if (response.ok) {
         setReportGenerated(true)
-        alert('Report generated successfully!')
+        setReportContent(data.report)
+        setReportFilename(data.report_filename)
         await fetch(`/api/update-appointment/${currentAppointment.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -343,10 +359,22 @@ export default function Dashboard() {
           <div className="symptoms-section">
             <label>Detected Symptoms</label>
             <div className="symptoms-list">
-              {symptoms.length > 0 ? (
-                symptoms.map((symptom, idx) => (
-                  <div key={idx} className="symptom-tag">{symptom}</div>
-                ))
+              {symptoms && symptoms.length > 0 ? (
+                symptoms.map((symptom, idx) => {
+                  // Handle both object and string formats
+                  const symptomName = typeof symptom === 'string' ? symptom : symptom.name || symptom;
+                  const duration = symptom.duration ? symptom.duration : 'not specified';
+                  
+                  return (
+                    <div key={idx} className="symptom-item">
+                      <div className="symptom-header">
+                        <span className="symptom-number">{idx + 1}</span>
+                        <span className="symptom-name">{symptomName}</span>
+                        <span className="symptom-duration">{duration}</span>
+                      </div>
+                    </div>
+                  );
+                })
               ) : (
                 <p className="no-data">No symptoms detected</p>
               )}
@@ -368,6 +396,28 @@ export default function Dashboard() {
           {reportGenerated && (
             <div className="report-status">
               <div className="status-success">✓ Report Generated</div>
+              {reportContent && (
+                <div className="report-display">
+                  <div className="report-title">Medical Consultation Report</div>
+                  <div className="report-content">
+                    <pre>{reportContent}</pre>
+                  </div>
+                  <button 
+                    className="download-btn"
+                    onClick={() => {
+                      const element = document.createElement('a')
+                      const file = new Blob([reportContent], {type: 'text/plain'})
+                      element.href = URL.createObjectURL(file)
+                      element.download = reportFilename || 'medical_report.txt'
+                      document.body.appendChild(element)
+                      element.click()
+                      document.body.removeChild(element)
+                    }}
+                  >
+                    ⬇ Download Report
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
