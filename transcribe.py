@@ -1,5 +1,5 @@
 from faster_whisper import WhisperModel
-from extractor import MedicalSymptomExtractor, save_to_json
+from extractor import MedicalSymptomExtractor
 
 # ================= MODEL =================
 model = WhisperModel("medium", device="cpu", compute_type="int8")
@@ -21,7 +21,6 @@ extractor = MedicalSymptomExtractor()
 results = extractor.extract(transcript)
 
 # ================= STEP 3: SAVE / PRINT =================
-save_to_json(results, "symptoms_from_audio.json")
 
-for r in results:
-    print(r)
+print("Extracted Symptoms:")
+print(results)

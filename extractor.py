@@ -1,122 +1,155 @@
-import spacy
 import re
+import spacy
 import json
-from typing import List, Dict
+from negspacy.negation import Negex
+from transformers import pipeline
+
 
 class MedicalSymptomExtractor:
-    """
-    medical symptom extractor using:
-    - scispaCy NER (BC5CDR)
-    - NegSpacy for negation detection
-    - Regex-based duration extraction
-    """
 
-    def __init__(self, model_name: str = "en_ner_bc5cdr_md"):
-        try:
-            self.nlp = spacy.load(model_name)
-        except OSError:
-            raise RuntimeError(
-                f"Model '{model_name}' not found. "
-                "Install from scispaCy releases."
-            )
+    def __init__(self):
 
-        # Ensure sentence boundaries
-        if "sentencizer" not in self.nlp.pipe_names:
-            self.nlp.add_pipe("sentencizer")
-
-        # Negation detection
-        from negspacy.negation import Negex
-        self.nlp.add_pipe("negex", config={"ent_types": ["DISEASE"]})
-
-        # Simple, high-coverage duration patterns
-        self.duration_regex = re.compile(
-            r"""
-            (for\s+(?:the\s+)?(?:past|last)?\s*\d+\s+(?:days?|weeks?|months?|years?))|
-            (\d+\s+(?:days?|weeks?|months?|years?)\s+ago)|
-            (since\s+\w+)
-            """,
-            re.IGNORECASE | re.VERBOSE
+        # HuggingFace NER
+        self.ner = pipeline(
+            "token-classification",
+            model="HUMADEX/english_medical_ner",
+            aggregation_strategy="simple",
+            device=-1
         )
 
-    def extract_duration(self, text: str) -> str:
-        match = self.duration_regex.search(text)
-        return match.group(0) if match else "not specified"
 
-    def extract(self, transcript: str) -> List[Dict]:
-        """
-        Extract symptoms with negation and duration.
-        """
-        doc = self.nlp(transcript)
-        results = []
+        # spaCy + Negspacy
+        self.nlp = spacy.load("en_core_web_sm")
+        self.nlp.add_pipe("negex")
 
-        for ent in doc.ents:
-            if ent.label_ != "DISEASE":
+        # Duration regex
+        self.duration_pattern = r"\b(\d+)\s+(day|days|week|weeks|month|months|year|years)\b"
+
+    # --------------------------------
+    # Extract durations with span
+    # --------------------------------
+    def extract_durations_with_span(self, text):
+        durations = []
+        for match in re.finditer(self.duration_pattern, text.lower()):
+            durations.append({
+                "text": match.group(),
+                "start": match.start(),
+                "end": match.end()
+            })
+        return durations
+
+    # --------------------------------
+    # Attach nearest duration
+    # --------------------------------
+    def attach_duration(self, symptom_start, durations, window=60):
+
+        closest = None
+        min_distance = float("inf")
+
+        for d in durations:
+            distance = abs(symptom_start - d["start"])
+            if distance < min_distance and distance <= window:
+                min_distance = distance
+                closest = d["text"]
+
+        return closest
+
+    # --------------------------------
+    # Assertion classification
+    # --------------------------------
+    def classify_assertion(self, negated, doc, entity_start, entity_end):
+
+        if negated:
+            return "absent"
+
+        # Define uncertainty words
+        uncertainty_words = {"might", "maybe", "possibly", "could", "suspect"}
+
+        # Look 5 tokens before symptom
+        window_size = 5
+
+        for token in doc:
+            if token.idx >= entity_start:
+                break
+
+            if entity_start - token.idx <= 50:  # small char window
+                if token.text.lower() in uncertainty_words:
+                    return "possible"
+
+        return "present"
+
+
+    # --------------------------------
+    # Main extraction
+    # --------------------------------
+    def extract(self, text):
+
+        doc = self.nlp(text)
+        durations = self.extract_durations_with_span(text)
+
+        ner_results = self.ner(text)
+
+        # Filter PROBLEM entities
+        problem_entities = [
+            e for e in ner_results
+            if "PROBLEM" in e["entity_group"]
+        ]
+
+        # Merge adjacent tokens
+        merged_entities = []
+        current = None
+
+        for entity in problem_entities:
+
+            if current is None:
+                current = entity
                 continue
 
-            sentence = ent.sent.text.strip()
-            duration = self.extract_duration(sentence)
+            if entity["start"] <= current["end"] + 1:
+                current["word"] += " " + entity["word"]
+                current["end"] = entity["end"]
+                current["score"] = max(current["score"], entity["score"])
+            else:
+                merged_entities.append(current)
+                current = entity
 
-            negated = bool(getattr(ent._, "negex", False))
+        if current:
+            merged_entities.append(current)
 
-            results.append({
-                "symptom": ent.text,
-                "status": "absent" if negated else "present",
-                "duration": duration,
-                "context": sentence
+        # Build output
+        symptoms = []
+
+        for entity in merged_entities:
+
+            # Remove very short noise
+            if len(entity["word"]) <= 2:
+                continue
+
+            # Negation detection
+            span = doc.char_span(entity["start"], entity["end"])
+            negated = span._.negex if span else False
+
+            # Assertion
+            assertion = self.classify_assertion(
+                negated,
+                doc,
+                entity["start"],
+                entity["end"]
+            )
+
+
+            # Attach duration
+            duration = self.attach_duration(entity["start"], durations)
+
+            symptoms.append({
+                "name": entity["word"].lower(),
+                "confidence": round(entity["score"], 3),
+                "assertion": assertion,
+                "duration": duration
             })
 
-        return results
-    
+        return {
+            "symptoms": symptoms
+        }
 
-    
-def save_to_json(results, output_file="symptoms_output.json"):
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
 
-    print(f"Results saved to {output_file}")
-
-if __name__ == "__main__":
-    extractor = MedicalSymptomExtractor()
-
-    text = """
-    Doctor: Good morning, what brings you in today?
-    
-    Patient: Hi doctor, I've been having this terrible headache for the past 3 days. 
-    It's really been bothering me.
-    
-    Doctor: I see. Can you describe the headache? Where is it located?
-    
-    Patient: It's mostly on the right side of my head, and it's a throbbing pain. 
-    I've also had some nausea since yesterday.
-    
-    Doctor: Have you had any fever?
-    
-    Patient: Yes, I had a low-grade fever for about 2 days, but it went away this morning.
-    
-    Doctor: Any other symptoms?
-    
-    Patient: Well, I've been feeling fatigued for the last week or so. And I've had a 
-    sore throat for 4 days now. Also experiencing some chest pain that started 2 days ago.
-    
-    Doctor: Okay, let me examine you. Any shortness of breath?
-    
-    Patient: A little bit, yes. It started yesterday.
-    
-    Doctor: Any vomiting or diarrhea?
-    
-    Patient: No vomiting, no diarrhea. Patient denies any bleeding or bruising.
-    
-    Doctor: Have you had any cough?
-    
-    Patient: No cough at all. And I haven't had any dizziness either.
-    
-    Doctor: Good. No swelling in the legs?
-    
-    Patient: No swelling. No rash either.
-    """
-
-    results = extractor.extract(text)
-    save_to_json(results, "symptoms_output.json")
-
-    for r in results:
-        print(r)
