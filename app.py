@@ -4,11 +4,9 @@ import uuid
 from werkzeug.utils import secure_filename
 from flask import Flask, request, render_template, jsonify, session, redirect, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
-import subprocess
-import json
 from datetime import datetime
 from utils.token_generator import generate_token, validate_token_format
-from openai import OpenAI
+from transcribe import transcribe_audio
 try:
     from pydub import AudioSegment
     PYDUB_AVAILABLE = True
@@ -35,11 +33,11 @@ REPORTS_DIR = os.path.join(BASE_DIR, "reports")
 os.makedirs(REPORTS_DIR, exist_ok=True)
 
 # OpenAI API client for Whisper transcription
-try:
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-except Exception as e:
-    print(f"Warning: OpenAI API not configured. Transcription will use mock data. Error: {e}")
-    client = None
+#try:
+#    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+#except Exception as e:
+#    print(f"Warning: OpenAI API not configured. Transcription will use mock data. Error: {e}")
+#    client = None
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -47,7 +45,7 @@ def get_db_connection():
     return conn
 
 
-def extract_symptoms_from_transcript(transcript):
+#def extract_symptoms_from_transcript(transcript):
     """
     Extract symptoms from medical transcript using pattern matching.
     Returns a list of symptoms with status and details.
@@ -96,7 +94,7 @@ def extract_symptoms_from_transcript(transcript):
     return symptoms
 
 
-def transcribe_audio_with_whisper(audio_path):
+#def transcribe_audio_with_whisper(audio_path):
     """
     Use OpenAI Whisper API to transcribe audio file.
     Falls back to mock data if API not configured.
@@ -341,9 +339,6 @@ def user_info():
 # -------------------------------------------------------------------
 # Speech / Recording Simulation (placeholder logic)
 # -------------------------------------------------------------------
-is_recording = False
-current_language = "en"
-transcript_text = ""
 
 
 @app.route("/start-recording", methods=["POST"])
@@ -359,7 +354,7 @@ def start_recording():
 @app.route("/stop-recording", methods=["POST"])
 def stop_recording():
     """
-    Stop recording and process audio with Whisper API.
+    Stop recording and process audio with Faster Whisper.
     Returns transcript and extracted symptoms.
     """
     saved_filename = None
@@ -386,13 +381,25 @@ def stop_recording():
                         saved_filename = filename
                         print(f"Recording saved: {save_path} ({os.path.getsize(save_path)} bytes)")
                         
-                        # Transcribe with Whisper API
-                        print(f"Transcribing audio with Whisper API...")
-                        transcript_text = transcribe_audio_with_whisper(save_path)
-                        print(f"Transcript: {transcript_text}")
+                        wav_path = save_path.replace('.webm', '.wav')
+                        try:
+                            audio = AudioSegment.from_file(save_path, format="webm")
+                            audio.export(wav_path, format="wav")
+                            audio_file = wav_path
+                        except Exception as e:
+                            print(f"Error converting audio with pydub: {e}. Using original file.")
+                            audio_file = save_path
+                        # ✅ USE FASTER WHISPER TRANSCRIPTION
+                        print(f"Transcribing audio with Faster Whisper...")
+                        result = transcribe_audio(audio_file)
                         
-                        # Extract symptoms from transcript
-                        symptoms = extract_symptoms_from_transcript(transcript_text)
+                        if "error" in result:
+                            return jsonify({"error": result["error"]}), 500
+                        
+                        transcript_text = result["transcript"]
+                        symptoms = result["symptoms"]
+                        
+                        print(f"Transcript: {transcript_text}")
                         print(f"Extracted symptoms: {symptoms}")
                     else:
                         return jsonify({"error": "File not saved properly"}), 400
@@ -410,7 +417,7 @@ def stop_recording():
             "status": "recording_stopped",
             "audio_file": saved_filename,
             "transcript": transcript_text,
-            "symptoms": symptoms,
+            "detected_symptoms": symptoms if isinstance(symptoms, list) else symptoms.get('symptoms', []),
             "message": "Recording processed successfully"
         }), 200
         
@@ -445,6 +452,19 @@ def generate_report():
             conn.close()
             return jsonify({"error": "Appointment not found"}), 404
         
+        # Get physician info from session or database
+        physician_name = "Not specified"
+        physician_speciality = "Not specified"
+        physician_contact = "Not specified"
+        
+        if "user" in session:
+            c.execute("SELECT name, speciality, contact FROM users WHERE email = ?", (session.get("user"),))
+            physician = c.fetchone()
+            if physician:
+                physician_name = physician['name'] if physician['name'] else "Not specified"
+                physician_speciality = physician['speciality'] if physician['speciality'] else "Not specified"
+                physician_contact = physician['contact'] if physician['contact'] else "Not specified"
+        
         # Build report content
         report_lines = [
             "="*60,
@@ -462,9 +482,9 @@ def generate_report():
             "",
             "PHYSICIAN INFORMATION",
             "-"*60,
-            f"Name: {appt['physician_name']}",
-            f"Speciality: {appt['physician_speciality']}",
-            f"Contact: {appt['physician_contact']}",
+            f"Name: {physician_name}",
+            f"Speciality: {physician_speciality}",
+            f"Contact: {physician_contact}",
             "",
             "CHIEF COMPLAINTS & SYMPTOMS",
             "-"*60,
@@ -472,9 +492,13 @@ def generate_report():
         
         if symptoms:
             for symptom in symptoms:
-                symptom_text = f"• {symptom['name'].title()}"
-                if symptom.get('duration'):
-                    symptom_text += f" (Duration: {symptom['duration']})"
+                # Handle both dict and string symptom formats
+                if isinstance(symptom, dict):
+                    symptom_text = f"• {symptom.get('name', symptom).title()}"
+                    if symptom.get('duration'):
+                        symptom_text += f" (Duration: {symptom['duration']})"
+                else:
+                    symptom_text = f"• {str(symptom).title()}"
                 report_lines.append(symptom_text)
         else:
             report_lines.append("• No specific symptoms reported")

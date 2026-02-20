@@ -22,20 +22,26 @@ class MedicalSymptomExtractor:
         self.nlp = spacy.load("en_core_web_sm")
         self.nlp.add_pipe("negex")
 
-        # Duration regex
-        self.duration_pattern = r"\b(\d+)\s+(day|days|week|weeks|month|months|year|years)\b"
-
     # --------------------------------
     # Extract durations with span
     # --------------------------------
-    def extract_durations_with_span(self, text):
+    def extract_durations_with_span(self, doc):
         durations = []
-        for match in re.finditer(self.duration_pattern, text.lower()):
-            durations.append({
-                "text": match.group(),
-                "start": match.start(),
-                "end": match.end()
-            })
+
+        for ent in doc.ents:
+            if ent.label_ == "DATE":
+                text = ent.text.lower()
+
+                # Only keep actual durations, not calendar dates
+                if any(unit in text for unit in [
+                    "day", "week", "month", "year"
+                ]):
+                    durations.append({
+                        "text": text,
+                        "start": ent.start_char,
+                        "end": ent.end_char
+                    })
+
         return durations
 
     # --------------------------------
@@ -85,7 +91,7 @@ class MedicalSymptomExtractor:
     def extract(self, text):
 
         doc = self.nlp(text)
-        durations = self.extract_durations_with_span(text)
+        durations = self.extract_durations_with_span(doc)
 
         ner_results = self.ner(text)
 
@@ -140,10 +146,12 @@ class MedicalSymptomExtractor:
 
             # Attach duration
             duration = self.attach_duration(entity["start"], durations)
+            confidence_score = float(entity["score"])
+            confidence_score = round(confidence_score, 3)
 
             symptoms.append({
                 "name": entity["word"].lower(),
-                "confidence": round(entity["score"], 3),
+                "confidence": confidence_score,
                 "assertion": assertion,
                 "duration": duration
             })
