@@ -52,3 +52,4 @@ recordings/*.wav
 recordings/*.mp3
 #model
 symptom_model/
+reports/
