@@ -50,3 +50,5 @@ yarn-error.log*
 recordings/*.webm
 recordings/*.wav
 recordings/*.mp3
+#model
+symptom_model/

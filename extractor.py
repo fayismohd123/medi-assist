@@ -3,24 +3,34 @@ import spacy
 import json
 from negspacy.negation import Negex
 from transformers import pipeline
-
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 class MedicalSymptomExtractor:
 
     def __init__(self):
 
-        # HuggingFace NER
         self.ner = pipeline(
             "token-classification",
-            model="HUMADEX/english_medical_ner",
-            aggregation_strategy="simple",
-            device=-1
+            model="./symptom_model",
+            tokenizer="./symptom_model",
+            aggregation_strategy="simple"
         )
 
-
+        #self.ner = pipeline(
+         #   "token-classification",
+          #  model="HUMADEX/english_medical_ner",
+           # aggregation_strategy="simple",
+            #device=-1
+        #)
+        self.nlp_med = spacy.load("en_core_sci_sm")
+        self.nlp_gen = spacy.load("en_core_web_sm")
         # spaCy + Negspacy
-        self.nlp = spacy.load("en_core_web_sm")
-        self.nlp.add_pipe("negex")
+        if "negex" not in self.nlp_med.pipe_names:
+            self.nlp_med.add_pipe("negex")
+
+        # Confidence threshold
+        self.confidence_threshold = 0.6
 
     # --------------------------------
     # Extract durations with span
@@ -32,14 +42,13 @@ class MedicalSymptomExtractor:
             if ent.label_ == "DATE":
                 text = ent.text.lower()
 
-                # Only keep actual durations, not calendar dates
                 if any(unit in text for unit in [
-                    "day", "week", "month", "year"
+                    "day", "week", "month", "year", "hour", "night","morning","afternoon","evening"
                 ]):
                     durations.append({
                         "text": text,
-                        "start": ent.start_char,
-                        "end": ent.end_char
+                        "start_token": ent.start,
+                        "end_token": ent.end
                     })
 
         return durations
@@ -47,32 +56,44 @@ class MedicalSymptomExtractor:
     # --------------------------------
     # Attach nearest duration
     # --------------------------------
-    def attach_duration(self, symptom_start, durations, window=60):
+    def attach_duration_dependency(self, symptom_span, durations):
+        if not symptom_span or not durations:
+            return None
 
-        closest = None
-        min_distance = float("inf")
+        best_duration = None
+        min_distance = float('inf')
 
-        for d in durations:
-            distance = abs(symptom_start - d["start"])
-            if distance < min_distance and distance <= window:
-                min_distance = distance
-                closest = d["text"]
+        for duration in durations:
 
-        return closest
+            # 🔹 Get the duration token from the doc
+            duration_token = symptom_span.doc[duration["start_token"]]
+
+            # 🔹 NEW: Only link if in the same sentence
+            if duration_token.sent != symptom_span.sent:
+                continue
+            # Calculate distance between symptom and duration tokens
+            if duration["start_token"] > symptom_span.end:
+                dist = duration["start_token"] - symptom_span.end
+            else:
+                dist = symptom_span.start - duration["end_token"]
+
+            # Only link if they are relatively close (e.g., within 10 tokens)
+            if dist < min_distance and dist < 10:
+                min_distance = dist
+                best_duration = duration["text"]
+
+        return best_duration
 
     # --------------------------------
     # Assertion classification
     # --------------------------------
-    def classify_assertion(self, negated, doc, entity_start, entity_end):
+    def classify_assertion(self, negated, doc, entity_start):
 
         if negated:
             return "absent"
 
         # Define uncertainty words
         uncertainty_words = {"might", "maybe", "possibly", "could", "suspect"}
-
-        # Look 5 tokens before symptom
-        window_size = 5
 
         for token in doc:
             if token.idx >= entity_start:
@@ -84,43 +105,54 @@ class MedicalSymptomExtractor:
 
         return "present"
 
+    # --------------------------------
+    # Merge adjacent entities safely
+    # --------------------------------
+    def merge_entities(self, entities):
+
+        if not entities:
+            return []
+
+        merged = []
+        current = entities[0]
+
+        for entity in entities[1:]:
+
+            if entity["start"] <= current["end"] + 2:
+                word = entity["word"].replace("##", "")
+                current["word"] += " " + word
+                current["end"] = entity["end"]
+                current["score"] = max(current["score"], entity["score"])
+            else:
+                merged.append(current)
+                current = entity
+
+        merged.append(current)
+        return merged
 
     # --------------------------------
     # Main extraction
     # --------------------------------
     def extract(self, text):
 
-        doc = self.nlp(text)
-        durations = self.extract_durations_with_span(doc)
+        doc_med = self.nlp_med(text)   # For negation
+        doc_gen = self.nlp_gen(text)
+        print("\nDetected Entities:")
+        for ent in doc_gen.ents:
+            print(ent.text, ent.label_)   # For duration + dependency
+        durations = self.extract_durations_with_span(doc_gen)
 
         ner_results = self.ner(text)
 
         # Filter PROBLEM entities
         problem_entities = [
             e for e in ner_results
-            if "PROBLEM" in e["entity_group"]
+            if e["entity_group"] == "SYMPTOM"
+            and e["score"] >= self.confidence_threshold
         ]
 
         # Merge adjacent tokens
-        merged_entities = []
-        current = None
-
-        for entity in problem_entities:
-
-            if current is None:
-                current = entity
-                continue
-
-            if entity["start"] <= current["end"] + 1:
-                current["word"] += " " + entity["word"]
-                current["end"] = entity["end"]
-                current["score"] = max(current["score"], entity["score"])
-            else:
-                merged_entities.append(current)
-                current = entity
-
-        if current:
-            merged_entities.append(current)
+        merged_entities = self.merge_entities(problem_entities)
 
         # Build output
         symptoms = []
@@ -132,26 +164,29 @@ class MedicalSymptomExtractor:
                 continue
 
             # Negation detection
-            span = doc.char_span(entity["start"], entity["end"])
+            span = doc_med.char_span(
+                entity["start"],
+                entity["end"],
+                alignment_mode="expand"
+            )
             negated = span._.negex if span else False
 
             # Assertion
+
             assertion = self.classify_assertion(
                 negated,
-                doc,
-                entity["start"],
-                entity["end"]
+                doc_med,
+                entity["start"]
             )
 
-
             # Attach duration
-            duration = self.attach_duration(entity["start"], durations)
-            confidence_score = float(entity["score"])
-            confidence_score = round(confidence_score, 3)
+            duration = None
+            if assertion in ["present", "possible"]:
+                duration = self.attach_duration_dependency(span, durations)
 
             symptoms.append({
                 "name": entity["word"].lower(),
-                "confidence": confidence_score,
+                "confidence": round(float(entity["score"]), 3),
                 "assertion": assertion,
                 "duration": duration
             })
@@ -161,3 +196,13 @@ class MedicalSymptomExtractor:
         }
 
 
+if __name__ == "__main__":
+
+    extractor = MedicalSymptomExtractor()
+
+    text = "I have been experiencing palpitations and fatigue since last week, but no chest pain or shortness of breath."
+
+    result = extractor.extract(text)
+
+    print("\nExtracted Symptoms:")
+    print(result)
