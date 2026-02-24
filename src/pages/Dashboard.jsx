@@ -201,7 +201,7 @@ export default function Dashboard() {
 
       if (response.ok) {
         setReportGenerated(true)
-        setReportContent(data.report)
+        setReportContent('Report generated successfully as PDF')
         setReportFilename(data.report_filename)
         await fetch(`/api/update-appointment/${currentAppointment.id}`, {
           method: 'PUT',
@@ -405,13 +405,17 @@ export default function Dashboard() {
                   <button 
                     className="download-btn"
                     onClick={() => {
-                      const element = document.createElement('a')
-                      const file = new Blob([reportContent], {type: 'text/plain'})
-                      element.href = URL.createObjectURL(file)
-                      element.download = reportFilename || 'medical_report.txt'
-                      document.body.appendChild(element)
-                      element.click()
-                      document.body.removeChild(element)
+                      if (reportFilename) {
+                        const downloadUrl = `/download-report/${reportFilename}`
+                        const link = document.createElement('a')
+                        link.href = downloadUrl
+                        link.download = reportFilename
+                        document.body.appendChild(link)
+                        link.click()
+                        document.body.removeChild(link)
+                      } else {
+                        alert('Report filename not available')
+                      }
                     }}
                   >
                     ⬇ Download Report

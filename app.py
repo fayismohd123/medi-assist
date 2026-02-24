@@ -7,6 +7,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from utils.token_generator import generate_token, validate_token_format
 from transcribe import transcribe_audio
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+from reportlab.lib.units import inch
+from reportlab.lib import colors
 try:
     from pydub import AudioSegment
     PYDUB_AVAILABLE = True
@@ -429,7 +434,7 @@ def stop_recording():
 @app.route("/generate_report", methods=["POST"])
 def generate_report():
     """
-    Generate medical report from consultation data.
+    Generate medical report from consultation data in PDF format.
     """
     try:
         data = request.get_json()
@@ -465,73 +470,133 @@ def generate_report():
                 physician_speciality = physician['speciality'] if physician['speciality'] else "Not specified"
                 physician_contact = physician['contact'] if physician['contact'] else "Not specified"
         
-        # Build report content
-        report_lines = [
-            "="*60,
-            "MEDICAL CONSULTATION REPORT",
-            "="*60,
-            "",
-            "PATIENT INFORMATION",
-            "-"*60,
-            f"Name: {appt['patient_name']}",
-            f"Date of Birth: {appt['patient_dob']}",
-            f"Email: {appt['patient_email']}",
-            f"Phone: {appt['patient_phone']}",
-            f"Appointment Token: {appt['token']}",
-            f"Date: {appt['appointment_date']}",
-            "",
-            "PHYSICIAN INFORMATION",
-            "-"*60,
-            f"Name: {physician_name}",
-            f"Speciality: {physician_speciality}",
-            f"Contact: {physician_contact}",
-            "",
-            "CHIEF COMPLAINTS & SYMPTOMS",
-            "-"*60,
+        # Generate PDF filename
+        pdf_filename = f"report_{appt['token']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        pdf_path = os.path.join(REPORTS_DIR, pdf_filename)
+        
+        # Create PDF document
+        doc = SimpleDocTemplate(pdf_path, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+        story = []
+        styles = getSampleStyleSheet()
+        
+        # Custom styles
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            textColor=colors.HexColor('#1a1a1a'),
+            spaceAfter=12,
+            alignment=1  # Center alignment
+        )
+        heading_style = ParagraphStyle(
+            'CustomHeading',
+            parent=styles['Heading2'],
+            fontSize=12,
+            textColor=colors.HexColor('#333333'),
+            spaceAfter=8,
+            spaceBefore=8,
+            borderColor=colors.grey,
+            borderWidth=1,
+            borderPadding=4
+        )
+        
+        # Title
+        story.append(Paragraph("MEDICAL CONSULTATION REPORT", title_style))
+        story.append(Spacer(1, 0.2*inch))
+        
+        # Patient Information Section
+        story.append(Paragraph("PATIENT INFORMATION", heading_style))
+        patient_data = [
+            ["Name:", appt['patient_name']],
+            ["Date of Birth:", appt['patient_dob']],
+            ["Email:", appt['patient_email']],
+            ["Phone:", appt['patient_phone']],
+            ["Appointment Token:", appt['token']],
+            ["Date:", appt['appointment_date']],
         ]
+        patient_table = Table(patient_data, colWidths=[2*inch, 4*inch])
+        patient_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+        ]))
+        story.append(patient_table)
+        story.append(Spacer(1, 0.15*inch))
         
+        # Physician Information Section
+        story.append(Paragraph("PHYSICIAN INFORMATION", heading_style))
+        physician_data = [
+            ["Name:", physician_name],
+            ["Speciality:", physician_speciality],
+            ["Contact:", physician_contact],
+        ]
+        physician_table = Table(physician_data, colWidths=[2*inch, 4*inch])
+        physician_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+        ]))
+        story.append(physician_table)
+        story.append(Spacer(1, 0.15*inch))
+        
+        # Chief Complaints & Symptoms Section
+        story.append(Paragraph("CHIEF COMPLAINTS & SYMPTOMS", heading_style))
         if symptoms:
+            symptoms_text = ""
             for symptom in symptoms:
-                # Handle both dict and string symptom formats
                 if isinstance(symptom, dict):
-                    symptom_text = f"• {symptom.get('name', symptom).title()}"
-                    if symptom.get('duration'):
-                        symptom_text += f" (Duration: {symptom['duration']})"
+                    symptom_name = symptom.get('name', symptom).title()
+                    duration = symptom.get('duration', "")
+                    if duration:
+                        symptoms_text += f"• {symptom_name} (Duration: {duration})<br/>"
+                    else:
+                        symptoms_text += f"• {symptom_name}<br/>"
                 else:
-                    symptom_text = f"• {str(symptom).title()}"
-                report_lines.append(symptom_text)
+                    symptoms_text += f"• {str(symptom).title()}<br/>"
+            story.append(Paragraph(symptoms_text, styles['Normal']))
         else:
-            report_lines.append("• No specific symptoms reported")
+            story.append(Paragraph("• No specific symptoms reported", styles['Normal']))
+        story.append(Spacer(1, 0.15*inch))
         
-        report_lines.extend([
-            "",
-            "CONSULTATION TRANSCRIPT",
-            "-"*60,
-            transcript if transcript else "No transcript available",
-            "",
-            "PHYSICIAN NOTES",
-            "-"*60,
-            consultation_notes if consultation_notes else "No additional notes",
-            "",
-            "ASSESSMENT & RECOMMENDATIONS",
-            "-"*60,
-            "• Further evaluation may be needed based on symptoms",
-            "• Patient advised to monitor symptoms and seek care if worsens",
-            "• Follow-up consultation recommended in 1 week",
-            "",
-            "="*60,
-            f"Report Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-            "="*60,
-        ])
+        # Consultation Transcript Section
+        story.append(Paragraph("CONSULTATION TRANSCRIPT", heading_style))
+        transcript_text = transcript if transcript else "No transcript available"
+        story.append(Paragraph(transcript_text, styles['Normal']))
+        story.append(Spacer(1, 0.15*inch))
         
-        report_text = "\n".join(report_lines)
+        # Physician Notes Section
+        story.append(Paragraph("PHYSICIAN NOTES", heading_style))
+        notes_text = consultation_notes if consultation_notes else "No additional notes"
+        story.append(Paragraph(notes_text, styles['Normal']))
+        story.append(Spacer(1, 0.15*inch))
         
-        # Save report to file
-        report_filename = f"report_{appt['token']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-        report_path = os.path.join(REPORTS_DIR, report_filename)
+        # Assessment & Recommendations Section
+        story.append(Paragraph("ASSESSMENT & RECOMMENDATIONS", heading_style))
+        recommendations = "• Further evaluation may be needed based on symptoms<br/>• Patient advised to monitor symptoms and seek care if worsens<br/>• Follow-up consultation recommended in 1 week"
+        story.append(Paragraph(recommendations, styles['Normal']))
+        story.append(Spacer(1, 0.2*inch))
         
-        with open(report_path, 'w') as f:
-            f.write(report_text)
+        # Footer with timestamp
+        footer_text = f"Report Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        footer_style = ParagraphStyle(
+            'Footer',
+            parent=styles['Normal'],
+            fontSize=9,
+            textColor=colors.grey,
+            alignment=1
+        )
+        story.append(Paragraph(footer_text, footer_style))
+        
+        # Build PDF
+        doc.build(story)
         
         # Update appointment in database with recording path and completion status
         c.execute(
@@ -543,13 +608,34 @@ def generate_report():
         
         return jsonify({
             "status": "success",
-            "report": report_text,
-            "report_filename": report_filename,
-            "message": "Report generated and saved successfully"
+            "report_filename": pdf_filename,
+            "message": "Report generated and saved as PDF successfully"
         }), 200
         
     except Exception as e:
         print(f"Error generating report: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/download-report/<filename>", methods=["GET"])
+def download_report(filename):
+    """
+    Download a generated PDF report.
+    """
+    try:
+        # Validate filename to prevent directory traversal
+        if ".." in filename or "/" in filename or "\\" in filename:
+            return jsonify({"error": "Invalid filename"}), 400
+        
+        report_path = os.path.join(REPORTS_DIR, filename)
+        
+        # Check if file exists
+        if not os.path.exists(report_path):
+            return jsonify({"error": "Report not found"}), 404
+        
+        return send_from_directory(REPORTS_DIR, filename, as_attachment=True, mimetype='application/pdf')
+    except Exception as e:
+        print(f"Error downloading report: {e}")
         return jsonify({"error": str(e)}), 500
 
 
