@@ -17,6 +17,9 @@ export default function Dashboard() {
   const [doctorName, setDoctorName] = useState('')
   const [appointments, setAppointments] = useState([])
   const [recordingFilename, setRecordingFilename] = useState('')
+  const [predictedDisease, setPredictedDisease] = useState('')
+  const [confidenceScore, setConfidenceScore] = useState(0)
+  const [isPredicting, setIsPredicting] = useState(false)
   const [physicianDetails, setPhysicianDetails] = useState({
     physician_name: '',
     physician_speciality: '',
@@ -97,6 +100,8 @@ export default function Dashboard() {
     setTranscript('')
     setReportGenerated(false)
     setLookupError('')
+    setPredictedDisease('')
+    setConfidenceScore(0)
   }
 
   const formatTime = (seconds) => {
@@ -145,9 +150,43 @@ export default function Dashboard() {
               } else {
                 setSymptoms(data.detected_symptoms)
               }
+              
+              // ✅ Call disease prediction endpoint with extracted symptoms
+              console.log('Calling predict-disease endpoint...')
+              setIsPredicting(true)
+              try {
+                const predictResponse = await fetch('/api/predict-disease', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    symptoms: Array.isArray(data.detected_symptoms) ? data.detected_symptoms : data.detected_symptoms.symptoms || []
+                  })
+                })
+                
+                const predictData = await predictResponse.json()
+                console.log('Disease prediction response:', predictData)
+                
+                if (predictResponse.ok && predictData.success) {
+                  setPredictedDisease(predictData.predicted_disease)
+                  setConfidenceScore(predictData.confidence)
+                  console.log(`Disease prediction: ${predictData.predicted_disease} (${predictData.confidence})`)
+                } else {
+                  console.warn('Disease prediction failed:', predictData.error)
+                  setPredictedDisease('')
+                  setConfidenceScore(0)
+                }
+              } catch (err) {
+                console.error('Error calling predict-disease:', err)
+                setPredictedDisease('')
+                setConfidenceScore(0)
+              } finally {
+                setIsPredicting(false)
+              }
             } else {
               console.warn('No symptoms found in response')
               setSymptoms([])
+              setPredictedDisease('')
+              setConfidenceScore(0)
             }
             alert('Recording processed successfully!')
           } else {
@@ -191,6 +230,8 @@ export default function Dashboard() {
           transcript: transcript,
           recording_filename: recordingFilename,
           notes: transcript,
+          predicted_disease: predictedDisease,
+          confidence: confidenceScore,
           physician_name: physicianDetails.physician_name,
           physician_speciality: physicianDetails.physician_speciality,
           physician_contact: physicianDetails.physician_contact
@@ -384,12 +425,30 @@ export default function Dashboard() {
           <div className="recommendations-section">
             <label>Disease Recommendations</label>
             <div className="recommendations-list">
-              <div className="recommendation-item">
-                <div className="rec-title">Based on consultation</div>
-                <p className="rec-desc">
-                  {transcript ? 'Analysis in progress...' : 'Add consultation notes to see recommendations'}
-                </p>
-              </div>
+              {isPredicting ? (
+                <div className="recommendation-item loading">
+                  <div className="rec-title">Predicting disease...</div>
+                  <p className="rec-desc">Analyzing symptoms to predict disease...</p>
+                </div>
+              ) : predictedDisease ? (
+                <div className="recommendation-item success">
+                  <div className="rec-title">Predicted Diagnosis</div>
+                  <div className="rec-disease">{predictedDisease}</div>
+                  <div className="rec-confidence">
+                    Confidence: {(confidenceScore * 100).toFixed(1)}%
+                  </div>
+                  <p className="rec-desc">
+                    Based on detected symptoms and AI analysis
+                  </p>
+                </div>
+              ) : (
+                <div className="recommendation-item">
+                  <div className="rec-title">Based on consultation</div>
+                  <p className="rec-desc">
+                    {transcript ? 'Record and analyze symptoms to see disease prediction' : 'Add consultation recording to see predictions'}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

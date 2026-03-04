@@ -21,6 +21,10 @@ export default defineConfig({
       '/generate_report': {
         target: 'http://127.0.0.1:5000',
         changeOrigin: true
+      },
+      '/download-report': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true
       }
     }
   },

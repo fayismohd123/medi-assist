@@ -19,6 +19,8 @@ except ImportError:
     print("Warning: pydub not available. Audio conversion will be skipped.")
     PYDUB_AVAILABLE = False
 import re
+import joblib
+import pandas as pd
 
 app = Flask(__name__, static_folder='dist', static_url_path='')
 app.secret_key = "mediassist_secret_key"
@@ -37,6 +39,26 @@ os.makedirs(RECORDINGS_DIR, exist_ok=True)
 REPORTS_DIR = os.path.join(BASE_DIR, "reports")
 os.makedirs(REPORTS_DIR, exist_ok=True)
 
+# -------------------------------------------------------------------
+# Disease Prediction Model Loading
+# -------------------------------------------------------------------
+DISEASE_MODEL_PATH = os.path.join(BASE_DIR, "disease_prediction_model.pkl")
+SYMPTOM_LIST_PATH = os.path.join(BASE_DIR, "symptom_list.pkl")
+
+# Load disease prediction model and symptom list
+disease_model = None
+symptom_list = None
+try:
+    if os.path.exists(DISEASE_MODEL_PATH) and os.path.exists(SYMPTOM_LIST_PATH):
+        disease_model = joblib.load(DISEASE_MODEL_PATH)
+        symptom_list = joblib.load(SYMPTOM_LIST_PATH)
+        print(f"✓ Disease prediction model loaded successfully")
+        print(f"✓ Symptom list loaded with {len(symptom_list)} symptoms")
+    else:
+        print(f"⚠ Disease model files not found at {DISEASE_MODEL_PATH} or {SYMPTOM_LIST_PATH}")
+except Exception as e:
+    print(f"⚠ Error loading disease model: {e}")
+
 # OpenAI API client for Whisper transcription
 #try:
 #    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -48,92 +70,6 @@ def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
-
-
-#def extract_symptoms_from_transcript(transcript):
-    """
-    Extract symptoms from medical transcript using pattern matching.
-    Returns a list of symptoms with status and details.
-    """
-    if not transcript:
-        return []
-    
-    transcript_lower = transcript.lower()
-    
-    # Common symptoms and their variations
-    symptom_patterns = {
-        "fever": [r"\bfever\b", r"\btemperature\b", r"\bhot\b", r"\bfebrile\b"],
-        "cough": [r"\bcough\b", r"\bcoughing\b", r"\bcoughs\b"],
-        "headache": [r"\bheadache\b", r"\bhead pain\b", r"\bheadaches\b"],
-        "sore_throat": [r"\bsore throat\b", r"\bthroat pain\b", r"\bthroat ache\b"],
-        "body_ache": [r"\bbody ache\b", r"\bbody pain\b", r"\bmuscle pain\b", r"\bache\b"],
-        "fatigue": [r"\bfatigue\b", r"\btired\b", r"\bweak\b", r"\bweakness\b"],
-        "nausea": [r"\bnausea\b", r"\bnauseous\b"],
-        "vomiting": [r"\bvomit\b", r"\bvomiting\b"],
-        "diarrhea": [r"\bdiarrhea\b", r"\bloose stool\b"],
-        "rash": [r"\brash\b", r"\bskin rash\b"],
-        "chills": [r"\bchills\b", r"\bchilly\b"],
-        "shortness_of_breath": [r"\bshortness of breath\b", r"\bdyspnea\b", r"\bbreathing difficulty\b"],
-        "congestion": [r"\bcongestion\b", r"\bcongested\b", r"\bnasal congestion\b"],
-        "sneeze": [r"\bsneeze\b", r"\bsneezing\b"],
-        "runny_nose": [r"\brunny nose\b", r"\bnasal discharge\b"],
-    }
-    
-    symptoms = []
-    
-    for symptom_name, patterns in symptom_patterns.items():
-        for pattern in patterns:
-            if re.search(pattern, transcript_lower):
-                # Extract duration if mentioned
-                duration_pattern = pattern + r".*?(?:for|since|about|for the last)\s+([\d\w\s]+)"
-                duration_match = re.search(duration_pattern, transcript_lower)
-                duration = duration_match.group(1).strip() if duration_match else None
-                
-                symptoms.append({
-                    "name": symptom_name.replace("_", " "),
-                    "status": "present",
-                    "duration": duration
-                })
-                break  # Found this symptom, move to next
-    
-    return symptoms
-
-
-#def transcribe_audio_with_whisper(audio_path):
-    """
-    Use OpenAI Whisper API to transcribe audio file.
-    Falls back to mock data if API not configured.
-    """
-    if not client:
-        # Return mock transcript if OpenAI not configured
-        return "Patient reports fever, cough, and body aches. Symptoms started 3 days ago. Has been experiencing chills and fatigue."
-    
-    try:
-        # Convert to WAV if needed and pydub is available
-        audio_file = audio_path
-        if PYDUB_AVAILABLE and audio_path.endswith('.webm'):
-            wav_path = audio_path.replace('.webm', '.wav')
-            try:
-                audio = AudioSegment.from_file(audio_path, format="webm")
-                audio.export(wav_path, format="wav")
-                audio_file = wav_path
-            except Exception as e:
-                print(f"Error converting audio with pydub: {e}. Using original file.")
-                audio_file = audio_path
-        
-        # Transcribe with Whisper API
-        with open(audio_file, "rb") as f:
-            transcript = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=f,
-                language="en"
-            )
-        
-        return transcript.text
-    
-    except Exception as e:
-        print(f"Whisper API error: {e}")
-        return "Error transcribing audio. Please check OpenAI API configuration."
 
 
 # Ensure users table exists and has a 'name' column (migrate older DBs)
@@ -431,6 +367,83 @@ def stop_recording():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/predict-disease", methods=["POST"])
+def predict_disease():
+    """
+    Predict disease based on extracted symptoms.
+    Expects JSON payload with 'symptoms' list.
+    """
+    try:
+        if disease_model is None or symptom_list is None:
+            return jsonify({
+                "error": "Disease prediction model not available",
+                "predicted_disease": "Unknown",
+                "confidence": 0.0
+            }), 400
+        
+        data = request.get_json()
+        extracted_symptoms = data.get("symptoms", [])
+        
+        if not extracted_symptoms:
+            return jsonify({
+                "error": "No symptoms provided",
+                "predicted_disease": "Unknown",
+                "confidence": 0.0
+            }), 400
+        
+        # Extract symptom names from the extracted symptoms list
+        # Handle both dict and string formats
+        symptom_names = []
+        for symptom in extracted_symptoms:
+            if isinstance(symptom, dict):
+                # If symptom is a dict, extract the 'name' field
+                symptom_name = symptom.get('name', str(symptom)).lower().strip()
+            else:
+                # If symptom is a string, use it directly
+                symptom_name = str(symptom).lower().strip()
+            
+            symptom_names.append(symptom_name)
+        
+        print(f"Extracted symptom names: {symptom_names}")
+        print(f"Available symptoms in model: {symptom_list}")
+        
+        # Create binary feature vector (1 if symptom present, 0 if absent)
+        # Use exact matching of symptom names with model's symptom_list
+        input_vector = [
+            1 if symptom.lower() in symptom_names else 0 
+            for symptom in symptom_list
+        ]
+        
+        print(f"Input vector: {input_vector}")
+        
+        # Convert to DataFrame for prediction
+        input_df = pd.DataFrame([input_vector], columns=symptom_list)
+        
+        # Predict disease
+        predicted_disease = disease_model.predict(input_df)[0]
+        probabilities = disease_model.predict_proba(input_df)[0]
+        confidence = float(max(probabilities))  # Convert to float for JSON serialization
+        
+        print(f"Predicted Disease: {predicted_disease}, Confidence: {confidence}")
+        
+        return jsonify({
+            "success": True,
+            "predicted_disease": predicted_disease,
+            "confidence": round(confidence, 4),
+            "message": f"Disease prediction successful"
+        }), 200
+        
+    except Exception as e:
+        print(f"Error in predict_disease: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "error": str(e),
+            "predicted_disease": "Unknown",
+            "confidence": 0.0
+        }), 500
+
+
 @app.route("/generate_report", methods=["POST"])
 def generate_report():
     """
@@ -442,6 +455,8 @@ def generate_report():
         transcript = data.get("transcript", "")
         symptoms = data.get("symptoms", [])
         consultation_notes = data.get("notes", "")
+        predicted_disease = data.get("predicted_disease", "Unknown")
+        confidence = data.get("confidence", 0.0)
         recording_filename = data.get("recording_filename")
         
         if not appointment_id:
@@ -580,7 +595,14 @@ def generate_report():
         
         # Assessment & Recommendations Section
         story.append(Paragraph("ASSESSMENT & RECOMMENDATIONS", heading_style))
-        recommendations = "• Further evaluation may be needed based on symptoms<br/>• Patient advised to monitor symptoms and seek care if worsens<br/>• Follow-up consultation recommended in 1 week"
+        
+        # Include disease prediction if available
+        disease_prediction_text = ""
+        if predicted_disease and predicted_disease != "Unknown":
+            confidence_percent = round(confidence * 100, 1) if confidence else 0
+            disease_prediction_text = f"<b>Preliminary Disease Prediction:</b> {predicted_disease} (Confidence: {confidence_percent}%)<br/><br/>"
+        
+        recommendations = disease_prediction_text + "• Further evaluation may be needed based on symptoms<br/>• Patient advised to monitor symptoms and seek care if worsens<br/>• Follow-up consultation recommended in 1 week"
         story.append(Paragraph(recommendations, styles['Normal']))
         story.append(Spacer(1, 0.2*inch))
         

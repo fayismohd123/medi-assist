@@ -49,21 +49,23 @@ def transcribe_audio(audio_file_path):
         
         # Combine segments into one string for analysis
         transcript = " ".join([seg.text for seg in segments])
-        print(f"✅ Transcription complete:\n{transcript}\n")
+        # Apply medical correction layer
+        transcript1 = apply_medical_corrections(transcript)
+        print(f"✅ Transcription complete:\n{transcript1}\n")
         # STEP 2: EXTRACT SYMPTOMS
         print("💊 Extracting symptoms...")
-        symptoms_result = SYMPTOM_EXTRACTOR.extract(transcript)
-        print(f"✅ Raw symptoms extracted: {symptoms_result}\n")
+        symptoms_result = SYMPTOM_EXTRACTOR.extract(transcript1)
+        #print(f"✅ Raw symptoms extracted: {symptoms_result}\n")
         
         # Extract the 'symptoms' list from the result object
         symptoms_list = symptoms_result.get('symptoms', []) if isinstance(symptoms_result, dict) else symptoms_result
         
         # Convert to serializable format
         symptoms = convert_to_serializable(symptoms_list)
-        print(f"✅ Symptoms converted: {symptoms}\n")
+        print(f"✅ Symptoms extracted: {symptoms}\n")
         
         return {
-            "transcript": transcript,
+            "transcript": transcript1,
             "symptoms": symptoms
         }
     
@@ -74,12 +76,24 @@ def transcribe_audio(audio_file_path):
             "symptoms": [],
             "error": str(e)
         }
-
+def apply_medical_corrections(text):
+    """
+    Apply rule-based corrections for common medical ASR errors.
+    """
+    correction_rules = {
+        "working": "fever","work": "fever","worked": "fever",}
+    
+    words = text.split()
+    corrected_words = [
+        correction_rules.get(word.lower(), word) for word in words
+    ]
+    
+    return " ".join(corrected_words)
 
 # ================= STANDALONE SCRIPT MODE =================
 # If run directly (not imported), allow testing with output.wav
 if __name__ == "__main__":
-    audio_file = r"C:\Users\LENOVO\Desktop\mainproject\medi-assist\recording_20260220_195351.wav"
+    audio_file = "output.wav"
     result = transcribe_audio(audio_file)
     
     print("=" * 60)
