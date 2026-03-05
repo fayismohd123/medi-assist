@@ -1,0 +1,526 @@
+﻿Sl No,Drug_name,Category
+1,Lignocaine HCl injection I.P 1%,Anaesthetics
+2,Lignocaine +nifedipine ointment,Anaesthetics
+3,Prilocaine lignocaine       inj,Anaesthetics
+4,"Alprazolam tab I.P 0.25 mg,",Preanaesthetic medications
+5,Alprazolam tab I.P 0.5 mg,
+6,Amitriptyline tab I.P 10 mg,Preanaesthetic medications
+7,Midazolam   inj 5 mg/ml,Preanaesthetic medications
+8,Midazolam  I nj 5 mg/5 ml,Preanaesthetic medications
+9,Midazolam nasal spray 5mg/ml,Preanaesthetic medications
+10,Propantheline tab 15 mg,Preanaesthetic medications
+11,Paracetamol suppository 100 mg,NSAIDS
+12,Paracetamol inj 500 mg,NSAIDS
+13,Paracetamol tab 650 mg,NSAIDS
+14,Paracetamol tab 1000 mg,NSAIDS
+15,Paracetamol drops 100 mg/ml,NSAIDS
+16,Diclofenac sodium spray,NSAIDS
+17,Diclofenac sodium +  Serratiopeptidase Tab (50mg+ 10mg),NSAIDS
+18,"Diclofenac potassium tab 75 mg,",NSAIDS
+19,Diclofenac potassium tab 100 mg,
+20,Diclofenac potassium gel 1 %,NSAIDS
+21,Piroxicam  Inj 20mg/ml,NSAIDS
+22,Piroxicam     gel 0.5%,NSAIDS
+23,Piroxicam Tab I.P  20 mg,
+24,Mefenamic acid syr 100 mg/5ml,NSAIDS
+25,Mefenamic acid DT 500 mg,
+26,Mefenamic acid spray,NSAIDS
+27,Mefenamic acid capsules I.P 250 mg,NSAIDS
+28,Aceclofenac gel,NSAIDS
+29,"Serratiopeptidase I.P  tab 5 mg,",NSAIDS
+30,"Lornoxicam tab 8 mg,",NSAIDS
+31,Lornoxicam tab 4 mg,
+32,"Etoricoxib tab 60 mg,",NSAIDS
+33,"Etoricoxib tab 90mg,",
+34,Etoricoxib tab 120 mg,
+35,"Tramadol tab 50 mg,",OPIOID ANALGESICS
+36,Tramadol inj 100 mg/ml,OPIOID ANALGESICS
+37,Pentazocine  inj I.P60mg/ml,
+38,Morphine inj 2 mg/ml,OPIOID ANALGESICS
+39,Fentanyl inj 50 mcg/ml,OPIOID ANALGESICS
+40,Febuxostat,Drugs for Gout
+41,"Allopurinol tab I.P 100 mg,",Drugs for Gout
+42,Allopurinol tab I.P 300 mg,
+43,Colchicine tab 0.5 mg,Drugs for Gout
+44,"Methotrexate tab  5 mg ,",DMARDs
+45,Methotrexate tab7.5 mg,
+46,Methotrexate tab 10 mg,DMARDs
+47,"Azathioprine tab 25 mg,",DMARDs
+48,Azathioprine tab 50 mg,
+49,"Hydroxy chloroquine tab 100 mg,",DMARDs
+50,Sulfasalazine tab 1000 mg,
+51,Diacerein cap 50 mg,DMARDs
+52,Adrenaline 1 in 1000,ANTIALLERGICS
+53,Pheniramine maleate,ANTIALLERGICS
+54,Sodium chromoglycate eye drops,ANTIALLERGICS
+55,"Ebastine  tab 10 mg,",ANTIALLERGICS
+56,Ebastine  tab 20 mg,
+57,Loratadine  tab 5mg,ANTIALLERGICS
+58,Desloratadine  tab 5mg,ANTIALLERGICS
+59,Rupatadine tab 10 mg,ANTIALLERGICS
+60,Olopatadine  tab 5 mg,ANTIALLERGICS
+61,Azelastine nasal spray 140 mcg/puff,ANTIALLERGICS
+62,"Diazepam tab I.P  5 mg,",ANTIEPILEPTICS
+63,Diazepam tab I.P 10 mg,
+64,Phenobarbitone syr 30 mg/5ml,ANTIEPILEPTICS
+65,"Phenytoin Tab I.P  50 mg,",ANTIEPILEPTICS
+66,Phenytoin Inj I.P  2 ml amp,ANTIEPILEPTICS
+67,Sodium valproate inj 300 mg/ml,
+68,Levetiracetam tab 250 mg,ANTIEPILEPTICS
+69,Levetiracetam inj  500 mg/2ml,ANTIEPILEPTICS
+70,Gabapentin 300mg,
+71,Gabapentin 400mg,
+72,Lorazepam,ANTIEPILEPTICS
+73,Clobazam  tab10 mg,
+74,Mebendazole tab I.P 100 mg,ANTIHELMINTHIC AGENTS
+75,Mebendazole tab 200 mg,ANTIHELMINTHIC AGENTS
+76,Piperazine citrate syr  I.P 750 mg/5 ml,ANTIHELMINTHIC AGENTS
+77,"DEC tab I.P 50 mg,",ANTIFILARIALS
+78,Ivermectin tab 12 mg,ANTIFILARIALS
+79,Ampicillin  cap 1000 mg,ANTIBACTERIALS
+80,Amoxycillin  DT I.P 250 mg,
+81,Amoxycillin + Clavulanic acid dry syr [500+ 125],ANTIBACTERIALS
+82,"Amoxycillin + Clavulanic acid tab 228.5,457, 1000 mg",ANTIBACTERIALS
+83,Amoxycillin + Clavulanic acid inj  0.3g/10ml,ANTIBACTERIALS
+84,Amoxycillin + Clavulanic acid inj 0.6g/10 ml,
+85,Crystalline penicillin inj 10 lakh,ANTIBACTERIALS
+86,Penicillin V tab 500 mg,ANTIBACTERIALS
+87,Penicillin V tab 125 mg,ANTIBACTERIALS
+88,Ampicillin + cloxacillin tab [250+ 250 mg],ANTIBACTERIALS
+89,Cefuroxime syr 125 mg/5ml,ANTIBACTERIALS
+90,Cefuroxime tab 250 mg,ANTIBACTERIALS
+91,Cefuroxime inj 500 mg,ANTIBACTERIALS
+92,Cefuroxime inj 250 mg,
+93,Cefixime syr 50mg/5ml,ANTIBACTERIALS
+94,Cefixime tab I.P  100 mg,ANTIBACTERIALS
+95,Cefixime tab 250 mg,ANTIBACTERIALS
+96,Cefadroxyl syr I.P  125 mg/5ml,ANTIBACTERIALS
+97,Cefadroxyl tab 250 mg,ANTIBACTERIALS
+98,Cephalexin syr I.P 125 mg/5ml,ANTIBACTERIALS
+99,Cephalexin syr I.P 250 mg/5 ml,ANTIBACTERIALS
+100,Cephalexin tab 250 mg I.P,ANTIBACTERIALS
+101,Cephalexin tab 500 mg I.P,ANTIBACTERIALS
+102,Ceftriaxone inj 500 mg I.P,ANTIBACTERIALS
+103,Ceftriaxone  inj 1 g I.P,ANTIBACTERIALS
+104,Ceftriaxone  in j 2 g I.P,ANTIBACTERIALS
+105,Cefepime   inj 500 mg I.P,ANTIBACTERIALS
+106,Ceftazidime  inj 500 mg I.P,ANTIBACTERIALS
+107,Ceftazidime inj 1 g  I.P,ANTIBACTERIALS
+108,Ceftazidime inj 2 g,ANTIBACTERIALS
+109,Cefotaxime inj    500 mg,ANTIBACTERIALS
+110,Cefotaxime inj 1 g I.P,ANTIBACTERIALS
+111,Cefotaxime inj 2 g I.P,ANTIBACTERIALS
+112,Meropenem    inj 1 g,ANTIBACTERIALS
+113,Meropenem inj 500 mg,ANTIBACTERIALS
+114,Cefditoren   inj,ANTIBACTERIALS
+115,Cefazolin  inj,ANTIBACTERIALS
+116,"Cefoperazone inj 1g,
+Cefoperazone inj2 g",ANTIBACTERIALS
+117,Cefpodoxime proxetil  tab 100 mg,ANTIBACTERIALS
+118,"Cefpodoxime  + clavulanic acid tab 200 mg, 125 mg",ANTIBACTERIALS
+119,Ceftriaxone + sulbactam ( 1+ 0.5) g,ANTIBACTERIALS
+120,Piperacillin,ANTIBACTERIALS
+121,Piperacillin  inj 1500mg/ml,ANTIBACTERIALS
+122,Piperacillin    inj 2 g,ANTIBACTERIALS
+123,Doxycycline cap  200 mg I.P,ANTIBACTERIALS
+124,Gentamicin inj 40 mg/ml,ANTIBACTERIALS
+125,Gentamicin  inj 60 mg/ml,ANTIBACTERIALS
+126,Amikacin inj 1 g/2ml,ANTIBACTERIALS
+127,Amikacin  inj 100 mg  I.P,ANTIBACTERIALS
+128,Amikacin  inj 150 mg,ANTIBACTERIALS
+129,Amikacin inj 250 mg,ANTIBACTERIALS
+130,Vancomycin inj 100 mg/ml,ANTIBACTERIALS
+131,Ciprofloxacin  tab 1 g,ANTIBACTERIALS
+132,Tinidazole  tab I.P 1 g,
+133,Ornidazole tab 500 mg  I.P,ANTI INFECTIVE
+134,Linezolid  inj 100 mg/100 ml,ANTIBACTERIALS
+135,Linezolid  tab 200 mg I.P,ANTIBACTERIALS
+136,Teicoplanin inj 200 mg,ANTIBACTERIALS
+137,Azithromycin  syr 200 mg/5ml  I.P,ANTIBACTERIALS
+138,Erythromycin syr 125 mg/5ml,ANTIBACTERIALS
+139,Clarithromycin tab 250 mg  I.P,ANTIBACTERIALS
+140,Clindamycin  vaginal tablet 200 mg,ANTIBACTERIALS
+141,Clindamycin inj 300 mg,ANTIBACTERIALS
+142,Clindamycin cap 150 mg  I.P,ANTIBACTERIALS
+143,Chloramphenicoleye drops 0.05 % w/v I.P,ANTIBACTERIALS
+144,"Nalidixic acid tab 250 mg,500 mg",ANTIBACTERIALS
+145,Nalidixic acid syr  300 mg/5ml,ANTIBACTERIALS
+146,Nitrofurantoin tab 50 mg  I.P,ANTIBACTERIALS
+147,Bacitracin ointment,ANTIBACTERIALS
+148,Roxithromycin tab 150 mg  I.P,ANTIBACTERIALS
+149,Ofloxacin tab 400 mg,ANTIBACTERIALS
+150,Levofloxacin  tab 750 mg,ANTIBACTERIALS
+151,Minocycline tab 100 mg,ANTIBACTERIALS
+152,Povidone iodine +metronidazole ointment  ( 5% + 1%),ANTIBACTERIALS
+153,Fusidic acid  cream 2 %,ANTIBACTERIALS
+154,Rifaximin  tab,ANTIBACTERIALS
+155,Cotrimoxazole syr 40 mg/5 ml,ANTI INFECTIVE
+156,Cotrimoxazole syr ( 200 + 40 ) mg/5ml,ANTI INFECTIVE
+157,INH Tablet :300mg  I.P,ANTI -TB DRUGS
+158,Rifampicin Tablet :450mg,ANTI -TB DRUGS
+159,Rifampicin tab 600 mg,ANTI -TB DRUGS
+160,Ethambutol Tablet :400mg  I.P,ANTI -TB DRUGS
+161,Pyrazinamide Tablet :500mg  I.P,ANTI -TB DRUGS
+162,Streptomycin Injection:1gm  I.P,ANTI -TB DRUGS
+163,Clotrimazole vaginal tab 100mg,ANTIFUNGAL
+164,Clotrimazole vaginal tab 500mg,
+165,Fluconazole tab 100 mg  I.P,ANTIFUNGAL
+166,Fluconazole tab 50 mg  I.P,ANTIFUNGAL
+167,Itraconazole cap  100 mg,ANTIFUNGAL
+168,Amphotericin inj 50 mg/ml,ANTIFUNGAL
+169,Amphotericin inj colloid dispersion,ANTIFUNGAL
+170,Voriconazole inj,ANTIFUNGAL
+171,Acyclovir tab 200 mg  I.P,ANTIVIRAL DRUGS
+172,Acyclovir tab 400 mg  I.P,ANTIVIRAL DRUGS
+173,Primaquine tab  I.P,ANTIMALARIAL DRUGS
+174,Artesunate tab 60 mg,ANTIMALARIAL DRUGS
+175,Artesunate tab120 mg,ANTIMALARIAL DRUGS
+176,Propranolol LA 80 mg,ANTI MIGRAINE DRUGS
+177,"Cyproheptadine tab 2 mg,",ANTI MIGRAINE DRUGS
+178,Cyproheptadine tab 4 mg,
+179,Sumatriptan tab 25 mg,ANTI MIGRAINE DRUGS
+180,Sumatriptan s/c inj 6 mg,ANTI MIGRAINE DRUGS
+181,Ergotamine tab  1 mg I.P,ANTI MIGRAINE DRUGS
+182,Ergotamine sublingual tab,ANTI MIGRAINE DRUGS
+183,Cyclophosphamide Inj 200 mg  I.P,ANTICANCER DRUGS
+184,Cyclophosphamide inj 500 mg  I.P,ANTICANCER DRUGS
+185,Cyclosporine,IMMUNOSUPPRESSANT
+186,Bevacizumab inj 1000mg/4 ml,MONOCLONAL ANTIBODY
+187,Human Insulin plain 100 m IU/ml,"HORMONES AND
+ANTIHORMONES"
+188,Human Insulin NPH,"HORMONES AND
+ANTIHORMONES"
+189,Human Insulin Lente,"HORMONES AND
+ANTIHORMONES"
+190,"Human Insulin analogues- aspart,lispro","HORMONES AND
+ANTIHORMONES"
+191,Terlipressin inj,"HORMONES AND
+ANTIHORMONES"
+192,"Prednisolone inj I.P  20 mg/ ml ,","HORMONES AND
+ANTIHORMONES"
+193,Methyl prednisolone inj 125 mg,
+194,"Methyl prednisolone tab I.P  4 mg,
+Methyl prednisolone tab I.P  16 mg",HORMONES AND ANTIHORMONES
+195,Betamethasone inj 12 mg/ ml,"HORMONES AND
+ANTIHORMONES"
+196,"Betamethasone tab I.P  0.5mg,
+Betamethasone tab I.P 1 mg",HORMONES AND ANTIHORMONES
+197,Hydrocortisone tab,HORMONES AND ANTIHORMONES
+198,L thyroxinetab 200 mcg,"HORMONES AND
+ANTIHORMONES"
+199,Carbimazole tab I.P 20 mg,
+200,Propyl thio uracil tab100 mg,
+201,Natural progesterone tab 500 mg,"HORMONES AND
+ANTIHORMONES"
+202,Alpha hydroxy progesterone caproate inj,HORMONES AND ANTIHORMONES
+203,Ormeloxifene  HCl tab I.P 30 mg,HORMONES AND ANTIHORMONES
+204,Erythropoetin Recombinant inj,HORMONES AND ANTIHORMONES
+205,Erythropoetin Recombinant inj 2000  IU,
+206,Cholecalciferol,HORMONES AND ANTIHORMONES
+207,Triamcinolone acetonide nasal spray   110 mcg,HORMONES AND ANTIHORMONES
+208,Triamcinolone acetonide buccal paste 0.1 %,HORMONES AND ANTIHORMONES
+209,Beclomethasone nasal spray 50 mcg,"HORMONES AND
+ANTIHORMONES"
+210,Fluticasone propionate Nasal spray 50mcg,HORMONES AND ANTIHORMONES
+211,Fluticasone furoate Nasal spray 27.5mcg,HORMONES AND ANTIHORMONES
+212,Mometasone furoate Nasal spray 50mcg,HORMONES AND ANTIHORMONES
+213,Mometasone furoate cream 0. 1%,"HORMONES AND
+ANTIHORMONES"
+214,Budesonide aqueous Nasal spray 50mcg,HORMONES AND ANTIHORMONES
+215,Ciclesonide Nasal spray 50mcg,"HORMONES AND
+ANTIHORMONES"
+216,Progesterone + estrogen tab,"HORMONES AND
+ANTIHORMONES"
+217,"Alendronate tab 5 mg,","HORMONES AND
+ANTIHORMONES"
+218,Alendronate + Cholecalceferol tab 70 mg/1500 IU,HORMONES AND ANTIHORMONES
+219,Calcitonin nasal spray  200 IU/ puff,"HORMONES AND
+ANTIHORMONES"
+220,Teriparatide inj,"HORMONES AND
+ANTIHORMONES"
+221,Levodopa+carbidopa,ANTIPARKINSONISM DRUGS
+222,"Cabergoline tab 0.25 mg,",ANTIPARKINSONISM DRUGS
+223,Levodopa  500 mg tab I.P,ANTIPARKINSONISM DRUGS
+224,Iron syr,ANTIANAEMIC DRUGS
+225,Ferrous sulphate  tab I.P 200 mg,ANTIANAEMIC DRUGS
+226,Ferrous fumarate tab 300 mg,ANTIANAEMIC DRUGS
+227,Sodium feredetate,ANTIANAEMIC DRUGS
+228,Carbonyl iron,ANTIANAEMIC DRUGS
+229,Iron dextrose,ANTIANAEMIC DRUGS
+230,Folic acid    tab 100 mcg I.P,
+231,Iron + folic acid tab,ANTIANAEMIC DRUGS
+232,Factor 8,BLOOD PRODUCTS
+233,Factor9,BLOOD PRODUCTS
+234,"IV IG 2.5 g,",BLOOD PRODUCTS
+235,IV IG 5 g,
+236,Haes steril,PLASMA EXPANDERS
+237,Colloids,PLASMA EXPANDERS
+238,"Tranexemic acid tab 750 mg, 1 g",DRUGS ACTING ON BLOOD
+239,"Ethamsylate tab 250 mg,
+Ethamsylate tab500 mg",DRUGS ACTING ON BLOOD
+240,"Warfarin sodium tab 1 mg,",DRUGS ACTING ON BLOOD
+241,Glyceryl trinitrate Tab,
+242,"Glyceryl trinitratepatch5 mg, 10 mg",Antianginal
+243,Isosorbide MononitrateTab 30mg,
+244,Diltiazem Tab.I.P60mg,
+245,Diltiazem gel 2%,antihaemorrhoidal
+246,"Acetyl salicylic acid Tab.I.P  75/
+Acetyl salicylic acid Tab.I.P 150mg",antiplatelet
+247,Clopidogrel Tab.75mg,antiplatelet
+248,Heparin inj 5000 iu,antiplatelet
+249,Low molecular weight heparin,antiplatelet
+250,Amiodarone Tab.I.P 200mg,antiarrhythmic
+251,Atropine inj,antiarrhythmic
+252,Atropine 100ml/infusion,antiarrhythmic
+253,Ramipril Tab10mg,antihypertensive
+254,TelmisartanTabI.P 80mg,antihypertensive
+255,IndapamideTab 2.5mg  I.P,antihypertensive
+256,ChlorthiazideTab 12.5mg,antihypertensive
+257,Prazosin,antihypertensive
+258,Nifedipine TabI.P .5mg,antihypertensive
+259,Nifedipine SR  tab I.P 10mg,antihypertensive
+260,Nifedipine ointment,antihaemorrhoidal
+261,Labetalol,antihypertensive
+262,"Labetalol Injection 20mg/4ml,",antihypertensive
+263,Hydralazine,antihypertensive
+264,Hydralazine Injection 10mg,
+265,"Hydralazine Tab.25mg,50mg",antihypertensive
+266,Lisinopril,antihypertensive
+267,Nicardipine Injection,antihypertensive
+268,"/50/,500mg",
+269,Frusemide Inj,antihypertensive
+270,Frusemide syrup,antihypertensive
+271,Frusemide drops 10mg/5 ml,antihypertensive
+272,Digoxin drops 50 mcg/ml,antihypertensive
+273,Digoxin elixir 40 mg,antihypertensive
+274,Glycerol syp 100 ml,osmotic diuretic
+275,"Dopamine inj 200mg/5ml,40 mg/5 ml",drugs in heart failure
+276,Dobutamine inj 250mg/5ml,drugs in heart failure
+277,Adrenaline inj,drugs in heart failure
+278,Noradrenaline inj2 mg/1ml,drugs in heart failure
+279,Milrinone inj 10mg/10 ml,drugs in heart failure
+280,Torsemide 10 /20/100 mg tab,drugs in heart failure
+281,Inj Prostaglandin E1,drugs in heart failure
+282,Atorvastatin  tab 5///40/80 mg,hypolipidemic
+283,Fenofibrate,hypolipidemic
+284,Salicylic acid ointment,topical medicines
+285,Salicylic acid ointment 6%,
+286,,topical medicines
+287,Metronidazole gel,topical medicines
+288,Metronidazole oral gel,topical medicines
+289,Povidone iodine,topical medicines
+290,Povidone iodine ointment,topical medicines
+291,Povidone iodine solution  I.P,topical medicines
+292,Clotrimazole,topical medicines
+293,Clotrimazole vaginal tab 1000/200/600 mg,topical medicines
+294,"Clotrimazole topical cream  1%, 2%",topical medicines
+295,Clotrimazole  cream 1%,topical medicines
+296,Permethrin,topical medicines
+297,Hydrocortisone ointment 1%,topical medicines
+298,plain vaseline,topical medicines
+299,Emmolients,topical medicines
+300,Pantoprazole,anti peptic ulcer
+301,Pantoprazole tab 20/,anti peptic ulcer
+302,Pantoprazole sustained release  release tab 40 mg  I.P,anti peptic ulcer
+303,Ranitidine inj 150 mg/ml,anti peptic ulcer
+304,Ranitidine inj 50 mg /ml,
+305,Rabeprazole tab 20 mg,anti peptic ulcer
+306,Aluminium /Mg hydroxide(antacid) tab,anti peptic ulcer
+307,Aluminium /Mg hydroxide(antacid) syrup,anti peptic ulcer
+308,Lactobacillus tab,anti peptic ulcer
+309,Omeprazole cap 40 mg,
+310,Omeprazole+domperidone cap 20/10 mg,anti peptic ulcer
+311,Rabeprazole+ domperidone cap 20 /10 mg,anti peptic ulcer
+312,Lanzoprazole 15 mg tab,anti peptic ulcer
+313,"Lanzoprazole DT  ,4 mg",anti peptic ulcer
+314,Domperidone mouth dissolving tab 10mg,antiemetic
+315,"Domperidone syrup 1mg/ml,",antiemetic
+316,Domperidone inj 1mg/ml,antiemetic
+317,Ondansetron tab I.P 8 mg,
+318,"Ondansetron inj I.P 2mg/ml,",antiemetic
+319,Ondansetron syrup 2mg/5ml,antiemetic
+320,Promethazine tab I.P  10mg  Promethazine tab I.P25 mg,antiemetic
+321,"Betahistine tab 16,24 mg",
+322,prochlorperazine,antivertigo
+323,"prochlorperazine suppository 5mg,25mg",antivertigo
+324,"metoclopramide tab 5,",antivertigo
+325,metoclopramide inj 10mg/ml,
+326,Simethicone,antiulcer
+327,Cyclominol Tab 10mg,antispasmodic
+328,Bisacodyl Tab.5mg,
+329,"Bisacodyl suppository 5mg, I.P",laxatives
+330,Lactulose,laxatives
+331,Lactulose enema 100ml,laxatives
+332,Isphagulla husk,laxatives
+333,Racecadotril Tab 100mg,antidiarrhoeal
+334,Reduced osmolar WHO,antidiarrhoeal
+335,Zinc sulphate 20mg,antidiarrhoeal
+336,Zinc sulphate syrup 20mg/5ml,antidiarrhoeal
+337,Zinc sulphate DT 20mg,antidiarrhoeal
+338,Prebiotics  and probiotics,antidiarrhoeal
+339,Calcium dobesilate  500 mg cap,antihaemorrhoidal
+340,Hexastarch,solutions
+341,Dextran colloid,solutions
+342,K binding agent,solutions
+343,Isolyte P Inj,solutions
+344,Potassium chloride syrup,solutions
+345,Sodium Polystyrene sulphonate 15g/60ml,solutions
+346,Normal saline 1/2,solutions
+347,Amino acid solution 10%,solutions
+348,lipid- MVI 10%,solutions
+349,haesteril,plasma volume expander
+350,Gliclazide Tab 40 mg,hypoglycaemics
+351,Gliclazide Tab 80mg,
+352,Glibenclamide + metformin,hypoglycaemics
+353,Metformin Tab.250 mg,hypoglycaemics
+354,Pioglitazone 15/30mg,hypoglycaemics
+355,Clomiphene citrate Tab 100mg,
+356,"Misoprostol Tab.25 mcg, 200mcg,
+600mcg",oxytocics
+357,"Natural Progesterone Tab 100mg,200mg,500mg",progestins
+358,Medroxy Progesterone  Tab 10mg,progestins
+359,Norethisterone Tab 5mg,progestins
+360,Dinoprostone gel,prostaglandin analogues
+361,Dydrogestone Tab 10mg,progesterone
+362,"Alpha hydroxy progesterone caproate nj250mg,500mg",progesterone
+363,Progesterone + estrogen pill,oral contraceptive pills
+364,Diphtheria Antitoxin Inj,vaccines
+365,IVIG 2.5g,
+366,Baclofen Tab 10mg,
+367,Metaxalone,muscle relaxants
+368,acid concentrate can,dialysis solutions
+369,bicarbonate powder,dialysis solutions
+370,renalin bottles,dialysis solutions
+371,citric acid bottles,dialysis solutions
+372,peritoneal dialysis solution IP 1L,dialysis solutions
+373,repition,mood stabilisers
+374,repition,mood stabilisers
+375,prochlorperazine,antiemetic
+376,Syrup Expectorant,Respiratory drugs
+377,Deriphylline Syrup 100mg/5ml,Respiratory drugs
+378,Deriphylline Inj 100mg,Respiratory drugs
+379,Terbutaline tab 2.5 mg I.P,Respiratory drugs
+380,Salbutamol,Respiratory drugs
+381,Salbutamol Tab 2mg,Respiratory drugs
+382,Salbutamol rotacaps powder puff,Respiratory drugs
+383,Salbutamol inj,Respiratory drugs
+384,Salbutamol Respules,Respiratory drugs
+385,Salbutamol Nebulising solution 2mg/5ml,Respiratory drugs
+386,Salbutamol respiratory solution 2mg/5ml,Respiratory drugs
+387,Surfactant 8ml,Respiratory drugs
+388,Dexamethasone nebuliser solution 8ml,Respiratory drugs
+389,caffeine citrate 3ml,Respiratory drugs
+390,Albuterol respules,Respiratory drugs
+391,Levo salbutamol syrup 1mg/ml,Respiratory drugs
+392,Levo salbutamol Respiratory solution 0.0625 mg/ml,Respiratory drugs
+393,Budesonide,Respiratory drugs
+394,Budesonide MDI 100 mcg,Respiratory drugs
+395,Budesonide MDI 200 mcg,
+396,Budesonide respules 1mg,Respiratory drugs
+397,Budesonide Nebulising solution,Respiratory drugs
+398,"Fluticasone+ salmeterol rotacap,DPI",Respiratory drugs
+399,Monteleukast,Respiratory drugs
+400,Monteleukast Tab 4mg,Respiratory drugs
+401,Monteleukast Tab 5mg,
+402,Monteleukast Tab 10mg,
+403,Monteleukast Sachet 4mg,Respiratory drugs
+404,Magnesium sulphate Inj 50%,Respiratory drugs
+405,Ipratropium nasal spray0.03%,Respiratory drugs
+406,"Ipratropium MDI,DPI,rotacap",Respiratory drugs
+407,Beclomethasone rotacaps,Respiratory drugs
+408,Salmeterol,Respiratory drugs
+409,Theophylline,Respiratory drugs
+410,Aminophylline,Respiratory drugs
+411,Acebrophylline,Respiratory drugs
+412,Thiotropium,Respiratory drugs
+413,Levosalbutamol+ Ipratropium,Respiratory drugs
+414,"Formoterol+ Budesonide MDI,DPI,Rotacap",Respiratory drugs
+415,"Formoterol+ Budesonide Rotahaler,Inhaler",Respiratory drugs
+416,"Cough medications/mucolytics,expectorant",Respiratory drugs
+417,ipratropium+salbutamol MDI,Respiratory drugs
+418,xylometazoline nasal drops 0.05%,
+419,phenyl ephrine 10mg +pheniramine maleate 20mg Tab,Respiratory drugs
+420,phenyl ephrine 5mg +pheniramine maleate 10mg syrup,Respiratory drugs
+421,phenylephrine+CPM+PCM,Respiratory drugs
+422,pseudoephedrine ER tab 120mg,Respiratory drugs
+423,ambroxol sodium+salbutamol tablet,Respiratory drugs
+424,bromhexine tab,Respiratory drugs
+425,salbutamol+ theophylline tab,Respiratory drugs
+426,deflazacort 24mg,Respiratory drugs
+427,calcium carbonate tablets 1000mg,
+428,calcium carbonate tablets 1250mg,
+429,calcium carbonate tablets 250mg,
+430,calcium gluconate injection,vitamins & supplements
+431,Vitamin D drops,
+432,vitamin D3,vitamins & supplements
+433,glucosamine,vitamins & supplements
+434,L ornithine,vitamins & supplements
+435,B complex,vitamins & supplements
+436,B complex injection,vitamins & supplements
+437,B complex cap,vitamins & supplements
+438,B complex elixir,vitamins & supplements
+439,vitamin E cap 600mg,vitamins & supplements
+440,vitamin E drops,
+441,vitamin A capsule 25000U,vitamins & supplements
+442,calcium acetate tablet 667mg,vitamins & supplements
+443,sodium fluoride tab 20mg,vitamins & supplements
+444,calcium citrate tab,vitamins & supplements
+445,"L-ornithine, L-aspartate Inj",vitamins & supplements
+446,chondroitin,vitamins & supplements
+447,Hyaluronic acid injection,vitamins & supplements
+448,Suture materials,Miscellaneous
+449,Oxygen inhalation,Miscellaneous
+450,Elastocrepe bandage 7.5 cm width,Miscellaneous
+451,Cutting needle( medium and small),Miscellaneous
+452,Benzydamine,vitamins & supplements
+453,oral rinse 0.15% w/v,vitamins & supplements
+454,"cream/gel 1% w/w,5% w/w",vitamins & supplements
+455,"Alendronate tab. 5mg,35mg",wax softener
+456,Alendronate+ cholecalciferol tab. 70mg/2800 IU,Miscellaneous
+457,Paradichlorobenzene 2% + chlorbutanol 5% + benzocaine 2.7%+turpentine oil 15% ear drops,Miscellaneous
+458,Paradichlorobenzene 2%+ benzocaine 2.7% ear drops,Miscellaneous
+459,hand disinfectant,Miscellaneous
+460,bleach,Miscellaneous
+461,flunarizine tab 5 /10 mg,Miscellaneous
+462,flavoxate,Miscellaneous
+463,IV fat emulsion,Miscellaneous
+464,esmolol inj,antihypertensive
+465,terazocin,antihypertensive
+466,Botox inj,OPHTHALMIC PREPARATIONS
+467,Two component fibrin glue,OPHTHALMIC PREPARATIONS
+468,cyano acrylate glue,OPHTHALMIC PREPARATIONS
+469,Indocyamine green 25 mg powder for inj,OPHTHALMIC PREPARATIONS
+470,Deferasirox Tab : Tab 500/250mg,Iron chelator
+471,Blood leucocyte filter Set,Miscellaneous
+472,6MP  50 mg i.p,ANTICANCER DRUGS
+473,Daunorubicin inj,ANTICANCER DRUGS
+474,D – Penicillamine,ANTICANCER DRUGS
+475,Bleomycin Inj. 15 mg/iu,ANTICANCER DRUGS
+476,Etoposide Inj.,ANTICANCER DRUGS
+477,Leucovorrin calcium Inj. 50mg/5ml,ANTICANCER DRUGS
+478,Leucovorrin calcium Tab 50mg/5ml,ANTICANCER DRUGS
+479,Cytosine Arabinoside Inj. 100mg,ANTICANCER DRUGS
+480,Doxurubicin HCL Inj. 50mg,ANTICANCER DRUGS
+481,Filgrastim Inj. 500mg,Cytokine
+482,Ifosfamide Inj. 1gm/200mg,ANTICANCER DRUGS
+483,Mesna Inj.,ANTICANCER DRUGS
+484,Vinblastine 10mg/10ml,ANTICANCER DRUGS
+485,L-Asparaginase inj 500 IU,ANTICANCER DRUGS
+486,Hydroxy urea cap/tab 500mg,ANTISICKLING
+487,"Cetral line cannula, PICC and central line",Miscellaneous
+488,All trans retenoic Acid,ANTICANCER DRUGS
+489,Wysolone,"HORMONES AND
+ANTIHORMONES"
+490,Lamivudine tab,ANTIVIRAL
+491,Dacarbazine,ANTICANCER DRUGS
+492,"Calcerol sachet (60,000IU)",vitamins & supplements
+493,Pamidronate inj IV use (30mg),"HORMONES AND
+ANTIHORMONES"
+494,Thyroxin  tab (Eltroxin)100 mg/50 mg,"HORMONES AND
+ANTIHORMONES"
+495,Methylphenidate  SR  10 mg,antidepressants
+496,"Calcium, phosphorus & vit D suspension (Ca:P ratio 2:1)",vitamins & supplements
+497,Escitalopram,antidepressants
+498,Levamisole,Immune mediators
+499,Methotrexate inj 50g/2ml,ANTICANCER DRUGS
+500,Mycophenolate mofetil,Immune mediators

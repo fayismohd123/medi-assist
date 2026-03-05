@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [mediaRecorder, setMediaRecorder] = useState(null)
   const [symptoms, setSymptoms] = useState([])
   const [transcript, setTranscript] = useState('')
+  const [transcribedText, setTranscribedText] = useState('')
   const [reportGenerated, setReportGenerated] = useState(false)
   const [reportContent, setReportContent] = useState('')
   const [reportFilename, setReportFilename] = useState('')
@@ -20,6 +21,18 @@ export default function Dashboard() {
   const [predictedDisease, setPredictedDisease] = useState('')
   const [confidenceScore, setConfidenceScore] = useState(0)
   const [isPredicting, setIsPredicting] = useState(false)
+  const [isTranscribing, setIsTranscribing] = useState(false)
+  const [medicines, setMedicines] = useState([])
+  const [medicineInput, setMedicineInput] = useState('')
+  const [medicineList, setMedicineList] = useState([])
+  const [showMedicineDropdown, setShowMedicineDropdown] = useState(false)
+  const [currentMedicine, setCurrentMedicine] = useState({
+    name: '',
+    dosage: '',
+    frequency: '',
+    duration: ''
+  })
+  const [isSavingMedicines, setIsSavingMedicines] = useState(false)
   const [physicianDetails, setPhysicianDetails] = useState({
     physician_name: '',
     physician_speciality: '',
@@ -49,6 +62,17 @@ export default function Dashboard() {
         }
       })
       .catch(err => console.error('Failed to fetch appointments:', err))
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/get-medicines')
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(data => {
+        if (data.success) {
+          setMedicineList(data.medicines)
+        }
+      })
+      .catch(err => console.error('Failed to fetch medicines:', err))
   }, [])
 
   useEffect(() => {
@@ -98,10 +122,186 @@ export default function Dashboard() {
     setCurrentAppointment(appointment)
     setSymptoms([])
     setTranscript('')
+    setTranscribedText('')
     setReportGenerated(false)
     setLookupError('')
     setPredictedDisease('')
     setConfidenceScore(0)
+    setMedicines([])
+    setMedicineInput('')
+    setCurrentMedicine({ name: '', dosage: '', frequency: '', duration: '' })
+  }
+
+  const getFilteredMedicines = (query) => {
+    const normalizedQuery = query.trim().toLowerCase()
+    if (!normalizedQuery) {
+      return []
+    }
+    return medicineList
+      .filter(med => med.toLowerCase().includes(normalizedQuery))
+      .slice(0, 5)
+  }
+
+  const normalizeDosage = (value) => {
+    const trimmed = value.trim()
+    if (!trimmed) {
+      return ''
+    }
+    if (/nos$/i.test(trimmed)) {
+      return trimmed
+    }
+    if (/^\d+(\.\d+)?$/.test(trimmed)) {
+      return `${trimmed} Nos`
+    }
+    return trimmed
+  }
+
+  const normalizeDuration = (value) => {
+    const trimmed = value.trim()
+    if (!trimmed) {
+      return ''
+    }
+    if (trimmed.includes('ദിവസം') || trimmed.toLowerCase().includes('day')) {
+      return trimmed
+    }
+    if (/^\d+(\.\d+)?$/.test(trimmed)) {
+      return `${trimmed} ദിവസം`
+    }
+    return trimmed
+  }
+
+  const normalizeFrequency = (value) => {
+    const trimmed = value.trim()
+    if (!trimmed) {
+      return ''
+    }
+
+    const lower = trimmed.toLowerCase()
+    const timeOfDayMap = {
+      morning: 'രാവിലെ',
+      night: 'രാത്രി',
+      evening: 'വൈകുന്നേരം',
+      afternoon: 'ഉച്ചയ്ക്ക്',
+      noon: 'ഉച്ചയ്ക്ക്',
+      bedtime: 'രാത്രി'
+    }
+
+    if (timeOfDayMap[lower]) {
+      return timeOfDayMap[lower]
+    }
+
+    if (/^\d+$/.test(lower)) {
+      const timesPerDay = parseInt(lower, 10)
+      if (timesPerDay === 1) {
+        return 'ദിവസവും ഒരു തവണ'
+      }
+      if (timesPerDay > 1) {
+        if (24 % timesPerDay === 0) {
+          return `${24 / timesPerDay} മണിക്കൂർ ഇടവിട്ട്`
+        }
+        return `ദിവസത്തിൽ ${timesPerDay} തവണ`
+      }
+    }
+
+    return trimmed
+  }
+
+  const applyDosage = (value) => {
+    setCurrentMedicine(prev => ({ ...prev, dosage: normalizeDosage(value) }))
+  }
+
+  const applyDuration = (value) => {
+    setCurrentMedicine(prev => ({ ...prev, duration: normalizeDuration(value) }))
+  }
+
+  const applyFrequency = (value) => {
+    setCurrentMedicine(prev => ({ ...prev, frequency: normalizeFrequency(value) }))
+  }
+
+  const handleMedicineSearch = (e) => {
+    const value = e.target.value
+    setMedicineInput(value)
+    setShowMedicineDropdown(value.length > 0)
+  }
+
+  const handleMedicineKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      const matches = getFilteredMedicines(medicineInput)
+      if (matches.length > 0) {
+        handleSelectMedicineFromDropdown(matches[0])
+        return
+      }
+      if (medicineInput.trim()) {
+        setCurrentMedicine(prev => ({ ...prev, name: medicineInput.trim() }))
+        setShowMedicineDropdown(false)
+      }
+    }
+  }
+
+  const handleSelectMedicineFromDropdown = (medicineName) => {
+    setCurrentMedicine(prev => ({ ...prev, name: medicineName }))
+    setMedicineInput(medicineName)
+    setShowMedicineDropdown(false)
+  }
+
+  const handleAddMedicine = () => {
+    const normalizedMedicine = {
+      ...currentMedicine,
+      dosage: normalizeDosage(currentMedicine.dosage),
+      duration: normalizeDuration(currentMedicine.duration),
+      frequency: normalizeFrequency(currentMedicine.frequency)
+    }
+
+    if (!normalizedMedicine.name || !normalizedMedicine.duration || !normalizedMedicine.frequency) {
+      alert('Please fill in medicine name, dosage, and frequency')
+      return
+    }
+
+    const newMedicine = { ...normalizedMedicine }
+    setMedicines([...medicines, newMedicine])
+    setCurrentMedicine({ name: '', dosage: '', frequency: '', duration: '' })
+    setMedicineInput('')
+  }
+
+  const handleRemoveMedicine = (index) => {
+    setMedicines(medicines.filter((_, idx) => idx !== index))
+  }
+
+  const handleSaveMedicines = async () => {
+    if (!currentAppointment) {
+      alert('Please select an appointment first')
+      return
+    }
+
+    if (medicines.length === 0) {
+      alert('Please add at least one medicine')
+      return
+    }
+
+    try {
+      setIsSavingMedicines(true)
+      const response = await fetch('/api/save-medicines', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          appointment_id: currentAppointment.id,
+          medicines: medicines
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert(`Saved ${medicines.length} medicine(s) successfully!`)
+      } else {
+        alert('Error saving medicines: ' + data.error)
+      }
+    } catch (err) {
+      alert('Error: ' + err.message)
+    } finally {
+      setIsSavingMedicines(false)
+    }
   }
 
   const formatTime = (seconds) => {
@@ -126,6 +326,7 @@ export default function Dashboard() {
         
         // Upload recording to backend
         try {
+          setIsTranscribing(true)
           const formData = new FormData()
           formData.append('audio', audioBlob, 'recording.webm')
           
@@ -141,6 +342,7 @@ export default function Dashboard() {
             console.log('Response symptoms:', data.detected_symptoms)
             setRecordingFilename(data.audio_file)
             setTranscript(data.transcript)
+            setTranscribedText(data.transcript)
             // ✅ Handle detected_symptoms from backend
             if (data.detected_symptoms && Array.isArray(data.detected_symptoms)) {
               console.log('Setting symptoms:', data.detected_symptoms)
@@ -194,6 +396,8 @@ export default function Dashboard() {
           }
         } catch (err) {
           alert('Error uploading recording: ' + err.message)
+        } finally {
+          setIsTranscribing(false)
         }
       }
 
@@ -227,7 +431,7 @@ export default function Dashboard() {
         body: JSON.stringify({
           appointment_id: currentAppointment.id,
           symptoms: symptoms,
-          transcript: transcript,
+          transcript: transcribedText,
           recording_filename: recordingFilename,
           notes: transcript,
           predicted_disease: predictedDisease,
@@ -364,13 +568,146 @@ export default function Dashboard() {
                 </div>
 
                 <div className="transcript-section">
-                  <label>Consultation Notes</label>
+                  <div className="transcript-header">
+                    <label>Consultation Notes</label>
+                    {isTranscribing && (
+                      <div className="transcribing-indicator">
+                        <span className="spinner" />
+                        <span>Transcribing...</span>
+                      </div>
+                    )}
+                  </div>
                   <textarea
                     value={transcript}
                     onChange={(e) => setTranscript(e.target.value)}
                     placeholder="Enter consultation notes..."
-                    rows="6"
+                    rows="2"
                   />
+                </div>
+
+                {/* Medicines section moved here */}
+                <div className="medicines-section">
+                  <label>Prescribed Medicines</label>
+
+                  {/* Medicine Input Form */}
+                  <div className="medicine-form">
+                    <div className="form-group">
+                      <input
+                        type="text"
+                        placeholder="Type medicine..."
+                        value={medicineInput}
+                        onChange={handleMedicineSearch}
+                        onKeyDown={handleMedicineKeyDown}
+                        className="medicine-search"
+                      />
+                      {showMedicineDropdown && medicineInput.length > 0 && (
+                        <div className="medicine-dropdown">
+                          {getFilteredMedicines(medicineInput)
+                            .map((med, idx) => (
+                              <div
+                                key={idx}
+                                className="dropdown-item"
+                                onClick={() => handleSelectMedicineFromDropdown(med)}
+                              >
+                                {med}
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="form-row">
+                      <input
+                        type="text"
+                        placeholder="Dosage (e.g., 1,1/2)"
+                        value={currentMedicine.dosage}
+                        onChange={(e) => setCurrentMedicine(prev => ({ ...prev, dosage: e.target.value }))}
+                        onBlur={(e) => applyDosage(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            applyDosage(e.target.value)
+                          }
+                        }}
+                        className="form-input"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Frequency (e.g., 3x daily)"
+                        value={currentMedicine.frequency}
+                        onChange={(e) => setCurrentMedicine(prev => ({ ...prev, frequency: e.target.value }))}
+                        onBlur={(e) => applyFrequency(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            applyFrequency(e.target.value)
+                          }
+                        }}
+                        className="form-input"
+                      />
+                    </div>
+
+                    <div className="form-row">
+                      <input
+                        type="text"
+                        placeholder="Duration (e.g., 5 days)"
+                        value={currentMedicine.duration}
+                        onChange={(e) => setCurrentMedicine(prev => ({ ...prev, duration: e.target.value }))}
+                        onBlur={(e) => applyDuration(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            applyDuration(e.target.value)
+                          }
+                        }}
+                        className="form-input"
+                      />
+                      <button
+                        className="btn-add-medicine"
+                        onClick={handleAddMedicine}
+                      >
+                        Add Medicine
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Selected Medicines List */}
+                  <div className="medicines-list">
+                    {medicines.length > 0 ? (
+                      medicines.map((medicine, idx) => (
+                        <div key={idx} className="medicine-item">
+                          <div className="medicine-header">
+                            <div className="medicine-info">
+                              <div className="medicine-name">{medicine.name}</div>
+                              <div className="medicine-details">
+                                {medicine.dosage} • {medicine.frequency}
+                                {medicine.duration && ` • ${medicine.duration}`}
+                              </div>
+                            </div>
+                            <button
+                              className="btn-remove"
+                              onClick={() => handleRemoveMedicine(idx)}
+                              title="Remove medicine"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="no-data">No medicines added</p>
+                    )}
+                  </div>
+
+                  {medicines.length > 0 && (
+                    <button
+                      className="btn-save-medicines"
+                      onClick={handleSaveMedicines}
+                      disabled={isSavingMedicines}
+                    >
+                      {isSavingMedicines ? 'Saving...' : `Save ${medicines.length} Medicine(s)`}
+                    </button>
+                  )}
                 </div>
 
                 <button 
@@ -451,6 +788,7 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+
 
           {reportGenerated && (
             <div className="report-status">

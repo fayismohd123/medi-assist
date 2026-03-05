@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import uuid
+import json
 from werkzeug.utils import secure_filename
 from flask import Flask, request, render_template, jsonify, session, redirect, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -10,6 +11,7 @@ from transcribe import transcribe_audio
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+from reportlab.graphics.shapes import Drawing, Circle, String
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 try:
@@ -59,12 +61,55 @@ try:
 except Exception as e:
     print(f"⚠ Error loading disease model: {e}")
 
-# OpenAI API client for Whisper transcription
-#try:
-#    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-#except Exception as e:
-#    print(f"Warning: OpenAI API not configured. Transcription will use mock data. Error: {e}")
-#    client = None
+# Dataset-backed medicine list (fallback to COMMON_MEDICINES if dataset missing)
+MEDICINES_DATASET_PATH = os.path.join(BASE_DIR, "druglist221012.csv")
+MEDICINES_LIST = None
+
+def get_medicine_list():
+    global MEDICINES_LIST
+
+    if MEDICINES_LIST is not None:
+        return MEDICINES_LIST
+
+    if not os.path.exists(MEDICINES_DATASET_PATH):
+        print("Warning: medicines dataset not found. Using empty list.")
+        MEDICINES_LIST = []
+        return MEDICINES_LIST
+
+    try:
+        try:
+            df = pd.read_csv(
+                MEDICINES_DATASET_PATH,
+                usecols=["Drug_name"],
+                dtype=str,
+                encoding="utf-8",
+                low_memory=False
+            )
+        except UnicodeDecodeError:
+            df = pd.read_csv(
+                MEDICINES_DATASET_PATH,
+                usecols=["Drug_name"],
+                dtype=str,
+                encoding="latin-1",
+                low_memory=False
+            )
+    except Exception as e:
+        print(f"Warning: failed to read medicines dataset ({e}). Using empty list.")
+        MEDICINES_LIST = []
+        return MEDICINES_LIST
+
+    names_series = (
+        df["Drug_name"]
+        .dropna()
+        .astype(str)
+        .str.strip()
+    )
+
+    # Preserve order while removing duplicates
+    MEDICINES_LIST = list(dict.fromkeys(name for name in names_series if name))
+
+    print(f"Loaded {len(MEDICINES_LIST)} medicines from dataset.")
+    return MEDICINES_LIST
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -139,6 +184,7 @@ def ensure_appointments_table():
             appointment_time TEXT,
             status TEXT DEFAULT 'scheduled',
             consultation_notes TEXT,
+            prescribed_medicines TEXT DEFAULT '[]',
             recorded_audio_path TEXT,
             report_generated BOOLEAN DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -490,7 +536,14 @@ def generate_report():
         pdf_path = os.path.join(REPORTS_DIR, pdf_filename)
         
         # Create PDF document
-        doc = SimpleDocTemplate(pdf_path, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+        doc = SimpleDocTemplate(
+            pdf_path,
+            pagesize=letter,
+            topMargin=0.5*inch,
+            bottomMargin=0.5*inch,
+            leftMargin=0.75*inch,
+            rightMargin=0.75*inch
+        )
         story = []
         styles = getSampleStyleSheet()
         
@@ -517,50 +570,91 @@ def generate_report():
         
         # Title
         story.append(Paragraph("MEDICAL CONSULTATION REPORT", title_style))
-        story.append(Spacer(1, 0.2*inch))
+        story.append(Spacer(1, 0.15*inch))
         
-        # Patient Information Section
-        story.append(Paragraph("PATIENT INFORMATION", heading_style))
-        patient_data = [
-            ["Name:", appt['patient_name']],
-            ["Date of Birth:", appt['patient_dob']],
-            ["Email:", appt['patient_email']],
-            ["Phone:", appt['patient_phone']],
-            ["Appointment Token:", appt['token']],
-            ["Date:", appt['appointment_date']],
+        # Prescription-style header with physician details
+        header_bg = colors.HexColor('#8DBFC0')
+        header_text = colors.HexColor('#1f2a2a')
+        logo_ring = colors.HexColor('#6EA8A8')
+        
+        header_row_height = 72
+        logo_size = header_row_height
+        logo_center = logo_size / 2
+        logo_radius = (logo_size / 2) - 2
+        logo = Drawing(logo_size, logo_size)
+        logo.add(Circle(logo_center, logo_center, logo_radius, fillColor=header_bg, strokeColor=logo_ring))
+        logo.add(String(logo_center, logo_center + 7, "MEDI", textAnchor="middle", fontSize=9, fontName="Helvetica-Bold", fillColor=colors.black))
+        logo.add(String(logo_center, logo_center - 7, "ASSIST", textAnchor="middle", fontSize=9, fontName="Helvetica-Bold", fillColor=colors.black))
+        
+        header_title_style = ParagraphStyle(
+            'HeaderTitle',
+            parent=styles['Heading2'],
+            fontSize=15,
+            textColor=header_text,
+            leading=16,
+            spaceAfter=4
+        )
+        header_info_style = ParagraphStyle(
+            'HeaderInfo',
+            parent=styles['Normal'],
+            fontSize=9,
+            textColor=header_text,
+            leading=11
+        )
+        doctor_block = [
+            Paragraph("PHYSICIAN INFORMATION", header_title_style),
+            Paragraph(physician_name, header_info_style),
+            Paragraph(physician_speciality, header_info_style),
+            Paragraph(physician_contact, header_info_style),
         ]
-        patient_table = Table(patient_data, colWidths=[2*inch, 4*inch])
+        header_table = Table([[logo, doctor_block]], colWidths=[1.1*inch, 5.9*inch], rowHeights=[header_row_height])
+        header_table.setStyle(TableStyle([
+            ('BACKGROUND', (1, 0), (1, 0), header_bg),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+            ('LEFTPADDING', (1, 0), (1, 0), 12),
+            ('RIGHTPADDING', (1, 0), (1, 0), 12),
+            ('TOPPADDING', (1, 0), (1, 0), 8),
+            ('BOTTOMPADDING', (1, 0), (1, 0), 8),
+            ('TOPPADDING', (0, 0), (0, 0), 2),
+            ('BOTTOMPADDING', (0, 0), (0, 0), 2),
+        ]))
+        story.append(header_table)
+        story.append(Spacer(1, 0.15*inch))
+        
+        # Patient Information Section (compact two-column layout)
+        patient_label_style = ParagraphStyle(
+            'PatientLabel',
+            parent=styles['Heading2'],
+            fontSize=12,
+            textColor=colors.HexColor("#000000"),
+            leading=11,
+            spaceAfter=4,
+            leftIndent=0
+        )
+        story.append(Paragraph("PATIENT INFORMATION", patient_label_style))
+        patient_data = [
+            ["Name:", appt['patient_name'], "Appointment Token:", appt['token']],
+            ["Date of Birth:", appt['patient_dob'], "Date:", appt['appointment_date']],
+            ["Email:", appt['patient_email'], "Phone:", appt['patient_phone']],
+        ]
+        patient_table = Table(patient_data, colWidths=[1.2*inch, 2.6*inch, 1.5*inch, 1.7*inch])
         patient_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
-            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
             ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-            ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+            ('FONTNAME', (2, 0), (2, -1), 'Helvetica-Bold'),
+            ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#4b5563')),
+            ('TEXTCOLOR', (2, 0), (2, -1), colors.HexColor('#4b5563')),
+            ('TEXTCOLOR', (1, 0), (1, -1), colors.black),
+            ('TEXTCOLOR', (3, 0), (3, -1), colors.black),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 2),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('LINEBELOW', (0, 0), (-1, -1), 0.25, colors.HexColor('#d7d7d7')),
         ]))
         story.append(patient_table)
-        story.append(Spacer(1, 0.15*inch))
-        
-        # Physician Information Section
-        story.append(Paragraph("PHYSICIAN INFORMATION", heading_style))
-        physician_data = [
-            ["Name:", physician_name],
-            ["Speciality:", physician_speciality],
-            ["Contact:", physician_contact],
-        ]
-        physician_table = Table(physician_data, colWidths=[2*inch, 4*inch])
-        physician_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
-            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-            ('GRID', (0, 0), (-1, -1), 1, colors.grey),
-        ]))
-        story.append(physician_table)
-        story.append(Spacer(1, 0.15*inch))
+        story.append(Spacer(1, 0.2*inch))
         
         # Chief Complaints & Symptoms Section
         story.append(Paragraph("CHIEF COMPLAINTS & SYMPTOMS", heading_style))
@@ -604,6 +698,32 @@ def generate_report():
         
         recommendations = disease_prediction_text + "• Further evaluation may be needed based on symptoms<br/>• Patient advised to monitor symptoms and seek care if worsens<br/>• Follow-up consultation recommended in 1 week"
         story.append(Paragraph(recommendations, styles['Normal']))
+        story.append(Spacer(1, 0.15*inch))
+        
+        # Prescribed Medicines Section
+        story.append(Paragraph("PRESCRIBED MEDICINES", heading_style))
+        
+        # Fetch medicines from database
+        c.execute("SELECT prescribed_medicines FROM appointments WHERE id = ?", (appointment_id,))
+        medicines_result = c.fetchone()
+        medicines_list = []
+        if medicines_result and medicines_result['prescribed_medicines']:
+            try:
+                medicines_list = json.loads(medicines_result['prescribed_medicines'])
+            except json.JSONDecodeError:
+                medicines_list = []
+        
+        if medicines_list:
+            medicines_text = ""
+            for idx, medicine in enumerate(medicines_list, 1):
+                med_name = medicine.get('name', 'Unknown')
+                med_dosage = medicine.get('dosage', 'Not specified')
+                med_frequency = medicine.get('frequency', 'Not specified')
+                med_duration = medicine.get('duration', 'Not specified')
+                medicines_text += f"<b>{idx}. {med_name}</b><br/>Dosage: {med_dosage} | Frequency: {med_frequency} | Duration: {med_duration}<br/><br/>"
+            story.append(Paragraph(medicines_text, styles['Normal']))
+        else:
+            story.append(Paragraph("• No medicines prescribed", styles['Normal']))
         story.append(Spacer(1, 0.2*inch))
         
         # Footer with timestamp
@@ -711,6 +831,40 @@ def lookup_patient():
             "phone": r["phone"],
             "age": r["age"],
             "created_at": r["created_at"]
+        })
+
+    return jsonify({"patients": patients}), 200
+
+
+@app.route("/api/lookup-appointment-patient")
+def lookup_appointment_patient():
+    phone = request.args.get('phone', '').strip()
+    if not phone:
+        return jsonify({"patients": []}), 200
+
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute(
+        """
+        SELECT patient_name, patient_dob, patient_email, patient_phone, MAX(created_at) AS last_seen
+        FROM appointments
+        WHERE patient_phone = ?
+        GROUP BY patient_name, patient_dob, patient_email, patient_phone
+        ORDER BY last_seen DESC
+        """,
+        (phone,)
+    )
+    rows = c.fetchall()
+    conn.close()
+
+    patients = []
+    for r in rows:
+        patients.append({
+            "patient_name": r["patient_name"],
+            "patient_dob": r["patient_dob"],
+            "patient_email": r["patient_email"],
+            "patient_phone": r["patient_phone"],
+            "last_seen": r["last_seen"]
         })
 
     return jsonify({"patients": patients}), 200
@@ -887,6 +1041,129 @@ def update_appointment(appointment_id):
         
         return jsonify({'success': True, 'message': 'Appointment updated'}), 200
         
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ============ MEDICINE ENDPOINTS ============
+
+@app.route("/api/get-medicines", methods=["GET"])
+def get_medicines():
+    """
+    Get list of available medicines for autocomplete
+    """
+    try:
+        return jsonify({
+            'success': True,
+            'medicines': get_medicine_list()
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route("/api/save-medicines", methods=["POST"])
+def save_medicines():
+    """
+    Save prescribed medicines for an appointment
+    Expects: {
+        "appointment_id": int,
+        "medicines": [
+            {
+                "name": "Paracetamol",
+                "dosage": "500mg",
+                "frequency": "3 times daily",
+                "duration": "5 days"
+            },
+            ...
+        ]
+    }
+    """
+    try:
+        data = request.get_json()
+        appointment_id = data.get('appointment_id')
+        medicines = data.get('medicines', [])
+        
+        if not appointment_id:
+            return jsonify({'error': 'Appointment ID required'}), 400
+        
+        # Validate medicines list
+        if not isinstance(medicines, list):
+            return jsonify({'error': 'Medicines must be a list'}), 400
+        
+        # Validate each medicine has required fields
+        for medicine in medicines:
+            if not isinstance(medicine, dict):
+                return jsonify({'error': 'Each medicine must be an object'}), 400
+            if not medicine.get('name'):
+                return jsonify({'error': 'Medicine name required'}), 400
+            #if not medicine.get('dosage'):
+                #return jsonify({'error': 'Medicine dosage required'}), 400
+            if not medicine.get('frequency'):
+                return jsonify({'error': 'Medicine frequency required'}), 400
+        
+        # Convert medicines list to JSON string
+        import json
+        medicines_json = json.dumps(medicines)
+        
+        # Save to database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Verify appointment exists
+        cursor.execute('SELECT id FROM appointments WHERE id = ?', (appointment_id,))
+        if not cursor.fetchone():
+            conn.close()
+            return jsonify({'error': 'Appointment not found'}), 404
+        
+        # Update appointed with medicines
+        cursor.execute(
+            'UPDATE appointments SET prescribed_medicines = ? WHERE id = ?',
+            (medicines_json, appointment_id)
+        )
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Saved {len(medicines)} medicine(s)',
+            'medicines': medicines
+        }), 200
+        
+    except json.JSONDecodeError:
+        return jsonify({'error': 'Invalid JSON format'}), 400
+    except Exception as e:
+        print(f"Error saving medicines: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route("/api/get-appointment-medicines/<int:appointment_id>", methods=["GET"])
+def get_appointment_medicines(appointment_id):
+    """
+    Get prescribed medicines for a specific appointment
+    """
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT prescribed_medicines FROM appointments WHERE id = ?', (appointment_id,))
+        result = cursor.fetchone()
+        conn.close()
+        
+        if not result:
+            return jsonify({'error': 'Appointment not found'}), 404
+        
+        # Parse JSON medicines
+        import json
+        medicines_json = result['prescribed_medicines']
+        medicines = json.loads(medicines_json) if medicines_json else []
+        
+        return jsonify({
+            'success': True,
+            'medicines': medicines
+        }), 200
+        
+    except json.JSONDecodeError:
+        return jsonify({'error': 'Invalid medicines data'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

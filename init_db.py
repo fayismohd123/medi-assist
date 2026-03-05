@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     consultation_notes TEXT,
     recorded_audio_path TEXT,
     report_generated BOOLEAN DEFAULT 0,
+    prescribed_medicines TEXT DEFAULT '[]',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     completed_at DATETIME,
     doctor_id INTEGER,
@@ -61,6 +62,17 @@ CREATE TABLE IF NOT EXISTS appointments (
 )
 """)
 conn.commit()
+
+# Migrate existing appointments table if needed (add prescribed_medicines column if missing)
+try:
+    cols = [r[1] for r in c.execute("PRAGMA table_info(appointments)")]
+    if 'prescribed_medicines' not in cols:
+        c.execute("ALTER TABLE appointments ADD COLUMN prescribed_medicines TEXT DEFAULT '[]'")
+        conn.commit()
+        print("✓ Added 'prescribed_medicines' column to appointments table")
+except Exception as e:
+    print(f"Note: Could not add prescribed_medicines column: {e}")
+
 conn.close()
 print("Appointments table verified/created successfully")
 

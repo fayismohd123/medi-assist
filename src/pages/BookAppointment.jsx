@@ -15,6 +15,9 @@ export default function BookAppointment() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [lookupLoading, setLookupLoading] = useState(false)
+  const [lookupMessage, setLookupMessage] = useState('')
+  const [lookupResults, setLookupResults] = useState([])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -22,6 +25,52 @@ export default function BookAppointment() {
       ...prev,
       [name]: value
     }))
+    if (name === 'patient_phone') {
+      setLookupResults([])
+      setLookupMessage('')
+    }
+  }
+
+  const handleLookup = async () => {
+    const phone = formData.patient_phone.trim()
+    setLookupMessage('')
+    setLookupResults([])
+
+    if (!phone) {
+      setLookupMessage('Enter a phone number to search.')
+      return
+    }
+
+    setLookupLoading(true)
+    try {
+      const response = await fetch(`/api/lookup-appointment-patient?phone=${encodeURIComponent(phone)}`)
+      const data = await response.json()
+      if (response.ok) {
+        if (Array.isArray(data.patients) && data.patients.length > 0) {
+          setLookupResults(data.patients)
+        } else {
+          setLookupMessage('No existing patient found with this number.')
+        }
+      } else {
+        setLookupMessage(data.error || 'Lookup failed.')
+      }
+    } catch (err) {
+      setLookupMessage('Network error: ' + err.message)
+    } finally {
+      setLookupLoading(false)
+    }
+  }
+
+  const applyPatient = (patient) => {
+    setFormData(prev => ({
+      ...prev,
+      patient_name: patient.patient_name || '',
+      patient_dob: patient.patient_dob || '',
+      patient_email: patient.patient_email || '',
+      patient_phone: patient.patient_phone || prev.patient_phone
+    }))
+    setLookupResults([])
+    setLookupMessage('Existing patient selected. Please choose an appointment date.')
   }
 
   const handleSubmit = async (e) => {
@@ -103,6 +152,54 @@ export default function BookAppointment() {
             {error && <div className="error-message">{error}</div>}
 
             <div className="form-group">
+              <label htmlFor="phone">
+                <Phone size={18} /> Phone Number
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                name="patient_phone"
+                placeholder="+91 98765 43210"
+                value={formData.patient_phone}
+                onChange={handleChange}
+                required
+              />
+              <div className="lookup-row">
+                <button
+                  type="button"
+                  className="lookup-btn"
+                  onClick={handleLookup}
+                  disabled={lookupLoading}
+                >
+                  {lookupLoading ? 'Searching...' : 'Find Existing Patient'}
+                </button>
+              </div>
+              {lookupMessage && <div className="lookup-message">{lookupMessage}</div>}
+              {lookupResults.length > 0 && (
+                <div className="lookup-results">
+                  <div className="lookup-title">Existing patient(s) found</div>
+                  {lookupResults.map((patient, index) => (
+                    <div className="lookup-item" key={`${patient.patient_email}-${index}`}>
+                      <div className="lookup-details">
+                        <strong>{patient.patient_name}</strong>
+                        <span>DOB: {patient.patient_dob}</span>
+                        <span>Email: {patient.patient_email}</span>
+                        <span>Phone: {patient.patient_phone}</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="lookup-select"
+                        onClick={() => applyPatient(patient)}
+                      >
+                        Use This Patient
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="form-group">
               <label htmlFor="name">
                 <User size={18} /> Full Name
               </label>
@@ -141,21 +238,6 @@ export default function BookAppointment() {
                 name="patient_email"
                 placeholder="your@email.com"
                 value={formData.patient_email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="phone">
-                <Phone size={18} /> Phone Number
-              </label>
-              <input
-                id="phone"
-                type="tel"
-                name="patient_phone"
-                placeholder="+91 98765 43210"
-                value={formData.patient_phone}
                 onChange={handleChange}
                 required
               />
