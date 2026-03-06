@@ -3,6 +3,7 @@ import spacy
 import json
 from negspacy.negation import Negex
 from transformers import pipeline
+from py_heideltime import heideltime
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -52,7 +53,7 @@ class MedicalSymptomExtractor:
                     })
 
         return durations
-
+    
     # --------------------------------
     # Attach nearest duration
     # --------------------------------
@@ -105,7 +106,7 @@ class MedicalSymptomExtractor:
 
         return "present"
 
-    # --------------------------------
+        # --------------------------------
     # Merge adjacent entities safely
     # --------------------------------
     def merge_entities(self, entities):
@@ -118,7 +119,9 @@ class MedicalSymptomExtractor:
 
         for entity in entities[1:]:
 
-            if entity["start"] <= current["end"] + 2:
+            gap_text = text[current["end"]:entity["start"]]
+
+            if entity["start"] <= current["end"] + 2 and "," not in gap_text:
                 word = entity["word"].replace("##", "")
                 current["word"] += " " + word
                 current["end"] = entity["end"]
@@ -136,7 +139,7 @@ class MedicalSymptomExtractor:
     def extract(self, text):
 
         doc_med = self.nlp_med(text)   # For negation
-        doc_gen = self.nlp_gen(text)
+        doc_gen = self.nlp_gen(text.lower())
         print("\nDetected Entities:")
         for ent in doc_gen.ents:
             print(ent.text, ent.label_)   # For duration + dependency
@@ -153,7 +156,6 @@ class MedicalSymptomExtractor:
 
         # Merge adjacent tokens
         merged_entities = self.merge_entities(problem_entities)
-
         # Build output
         symptoms = []
 
@@ -200,8 +202,8 @@ if __name__ == "__main__":
 
     extractor = MedicalSymptomExtractor()
 
-    text = "I have been experiencing palpitations and fatigue since last week, but no chest pain or shortness of breath."
-
+    #text = "I have been experiencing palpitations and fatigue since last week, but no chest pain or shortness of breath."
+    text = "I have been suffering from sore throat,sore legs and sore hand for 10 days."
     result = extractor.extract(text)
 
     print("\nExtracted Symptoms:")
